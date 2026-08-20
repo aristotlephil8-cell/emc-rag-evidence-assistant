@@ -21,11 +21,20 @@ from app.models import (
 )
 from app.pipeline import pipeline_index_version
 from app.providers import ModelProvider, ProviderError
+from app.schemas.ingestion import ParsedDocument
 from app.search import ElasticsearchIndex, RetrievalService, SearchIndexError
 
-MAX_PARSED_CHARACTERS = 1_000_000
-MAX_PARSED_SECTIONS = 5_000
-MAX_DOCUMENT_CHUNKS = 5_000
+
+@dataclass(frozen=True)
+class IngestionLimits:
+    """Post-parse resource limits for a single trusted ingestion workflow."""
+
+    max_parsed_characters: int = 1_000_000
+    max_parsed_sections: int = 5_000
+    max_document_chunks: int = 5_000
+
+
+PUBLIC_INGESTION_LIMITS = IngestionLimits()
 
 
 class ServiceError(RuntimeError):
@@ -43,17 +52,44 @@ class DocumentService:
         index: ElasticsearchIndex,
         provider: ModelProvider,
         parser: ParserService | None = None,
+        limits: IngestionLimits = PUBLIC_INGESTION_LIMITS,
     ):
         self.settings = settings
         self.repository = repository
         self.index = index
         self.provider = provider
         self.parser = parser or ParserService()
+        self.limits = limits
 
     def list_documents(self) -> list[DocumentRecord]:
         return self.repository.list()
 
     def ingest(self, filename: str, content: bytes) -> IngestResponse:
+        return self._ingest(filename, content)
+
+    def ingest_preparsed(
+        self,
+        filename: str,
+        content: bytes,
+        parsed: ParsedDocument,
+    ) -> IngestResponse:
+        """Index a trusted local parser result without exposing a new HTTP capability.
+
+        The public API only calls :meth:`ingest`; private batch tooling uses this
+        method after bounded local page-segment parsing.
+        """
+
+        if parsed.filename != filename:
+            raise ValueError("preparsed filename must match ingestion filename")
+        return self._ingest(filename, content, parsed=parsed)
+
+    def _ingest(
+        self,
+        filename: str,
+        content: bytes,
+        *,
+        parsed: ParsedDocument | None = None,
+    ) -> IngestResponse:
         digest = hashlib.sha256(content).hexdigest()
         document_id = f"doc_{digest[:24]}"
         index_version = pipeline_index_version(self.settings)
@@ -84,11 +120,12 @@ class DocumentService:
             status=DocumentStatus.INDEXING,
         )
         try:
-            parsed = self.parser.parse(filename, content, self.settings.CVRAG_MODEL_DIR)
+            parsed = parsed or self.parser.parse(filename, content, self.settings.CVRAG_MODEL_DIR)
             parser_version = parsed.parser_version
             if (
-                len(parsed.sections) > MAX_PARSED_SECTIONS
-                or sum(len(section.text) for section in parsed.sections) > MAX_PARSED_CHARACTERS
+                len(parsed.sections) > self.limits.max_parsed_sections
+                or sum(len(section.text) for section in parsed.sections)
+                > self.limits.max_parsed_characters
             ):
                 raise ServiceError(
                     "resource_limit_exceeded",
@@ -97,7 +134,7 @@ class DocumentService:
             chunks = build_chunks(document_id, filename, parsed.sections)
             if not chunks:
                 raise ServiceError("empty_document", "No indexable text was parsed.")
-            if len(chunks) > MAX_DOCUMENT_CHUNKS:
+            if len(chunks) > self.limits.max_document_chunks:
                 raise ServiceError("resource_limit_exceeded", "Document exceeds the chunk limit.")
             vectors = self.provider.embed([chunk.text for chunk in chunks])
             if len(vectors) != len(chunks):

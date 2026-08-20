@@ -11,7 +11,7 @@ if (-not $PSBoundParameters.ContainsKey("Provider")) {
     $Provider = if ($env:CVRAG_PROVIDER) { $env:CVRAG_PROVIDER } else { "fake" }
 }
 if ($Provider -notin @("fake", "dashscope")) {
-    throw "CVRAG_PROVIDER must be 'fake' or 'dashscope'."
+    throw "Provider must be 'fake' or 'dashscope'."
 }
 if ($Provider -eq "dashscope" -and [string]::IsNullOrWhiteSpace($env:DASHSCOPE_API_KEY)) {
     throw "DashScope mode requires DASHSCOPE_API_KEY in the current process environment."
@@ -44,13 +44,13 @@ try {
     }
     & docker @arguments
     if ($LASTEXITCODE -ne 0) {
-        throw "CVRAG startup failed. Inspect with: docker compose --file docker-compose.yml ps"
+        throw "EMC_RAG startup failed. Inspect with: docker compose --file docker-compose.yml ps"
     }
 }
 finally {
     Pop-Location
 }
 
-Write-Host "CVRAG is ready (provider=$Provider)."
+Write-Host "EMC_RAG is ready (provider=$Provider)."
 Write-Host "Frontend: http://localhost:5173"
 Write-Host "Backend:  http://localhost:8000"

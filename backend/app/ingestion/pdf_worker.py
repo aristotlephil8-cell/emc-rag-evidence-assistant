@@ -27,6 +27,20 @@ _POSIX_RESOURCE_SIGNALS = {
 }
 
 
+def _safe_worker_failure_category(error: BaseException) -> str:
+    """Return a coarse diagnostic without propagating document or system text."""
+
+    if isinstance(error, ImportError | ModuleNotFoundError):
+        return "dependency"
+    if isinstance(error, MemoryError):  # Defensive: normally handled above.
+        return "memory"
+    if isinstance(error, OSError | PermissionError):
+        return "runtime_io"
+    if isinstance(error, RuntimeError | TypeError | ValueError | AssertionError):
+        return "runtime"
+    return "unexpected"
+
+
 def _remaining(deadline: float) -> float:
     return max(0.0, deadline - monotonic())
 
@@ -67,13 +81,14 @@ def _worker_entry(
                 "DeepDOC worker exceeded the 2 GiB memory limit",
             )
         )
-    except BaseException:
+    except BaseException as error:
         with suppress(BaseException):
             connection.send(
                 (
                     "error",
                     IngestionErrorCode.PARSE_FAILED.value,
                     "DeepDOC worker failed",
+                    _safe_worker_failure_category(error),
                 )
             )
     finally:
@@ -145,8 +160,11 @@ def run_deepdoc_worker(
         process.join(timeout=_remaining(deadline))
         if payload[0] == "ok":
             return payload[1]
-        _, raw_code, safe_message = payload
-        raise IngestionError(IngestionErrorCode(raw_code), safe_message)
+        _, raw_code, safe_message, *diagnostic = payload
+        error = IngestionError(IngestionErrorCode(raw_code), safe_message)
+        if diagnostic and isinstance(diagnostic[0], str):
+            error.diagnostic_category = diagnostic[0]  # type: ignore[attr-defined]
+        raise error
     except (EOFError, BrokenPipeError, OSError) as exc:
         exitcode = process.exitcode if process is not None else None
         if process is not None:

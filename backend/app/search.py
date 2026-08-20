@@ -92,6 +92,7 @@ class ElasticsearchIndex:
                 "page_number": {"type": "integer"},
                 "section_path": {"type": "keyword"},
                 "bbox": {"type": "double"},
+                "table_index": {"type": "integer"},
                 "table_row": {"type": "integer"},
                 "parser_locator": {"type": "flattened"},
             },
@@ -242,6 +243,7 @@ class ElasticsearchIndex:
                                 "page_number": chunk.source.page_number,
                                 "section_path": chunk.source.section_path,
                                 "bbox": chunk.source.bbox,
+                                "table_index": chunk.source.table_index,
                                 "table_row": chunk.source.table_row,
                                 "parser_locator": chunk.source.parser_locator,
                             },
@@ -357,6 +359,7 @@ class ElasticsearchIndex:
                         page_number=source.get("page_number"),
                         section_path=section_path,
                         bbox=bbox,
+                        table_index=source.get("table_index"),
                         table_row=source.get("table_row"),
                         parser_locator=(
                             source.get("parser_locator")

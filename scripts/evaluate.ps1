@@ -4,6 +4,9 @@ param(
     [string]$ModelDir = "models/deepdoc",
     [string]$ElasticsearchUrl = "http://localhost:9200",
     [string]$CondaEnvironment = "cvrag",
+    [ValidateSet("all", "dev", "frozen")]
+    [string]$Stage = "all",
+    [string]$DevelopmentReport = "artifacts/evaluation/dev.json",
     [switch]$ValidateOnly,
     [switch]$SkipAssetPreparation
 )
@@ -19,11 +22,42 @@ function Assert-NotTemporaryPath {
     }
 }
 
+function Import-DashScopeApiKeyFromDotEnv {
+    param([Parameter(Mandatory = $true)][string]$Path)
+
+    if (-not [string]::IsNullOrWhiteSpace($env:DASHSCOPE_API_KEY) -or -not (Test-Path -LiteralPath $Path -PathType Leaf)) {
+        return
+    }
+
+    $match = Select-String `
+        -LiteralPath $Path `
+        -Pattern '^\s*(?:export\s+)?DASHSCOPE_API_KEY\s*=\s*(?<value>.*)\s*$' `
+        | Select-Object -First 1
+    if ($null -eq $match) {
+        return
+    }
+
+    $value = $match.Matches[0].Groups["value"].Value.Trim()
+    if (
+        $value.Length -ge 2 -and (
+            ($value.StartsWith('"') -and $value.EndsWith('"')) -or
+            ($value.StartsWith("'") -and $value.EndsWith("'"))
+        )
+    ) {
+        $value = $value.Substring(1, $value.Length - 2)
+    }
+    if (-not [string]::IsNullOrWhiteSpace($value)) {
+        $env:DASHSCOPE_API_KEY = $value
+    }
+}
+
 if (-not (Get-Command conda -ErrorAction SilentlyContinue)) {
     throw "Conda was not found. Create the '$CondaEnvironment' environment first."
 }
 
 $repositoryRoot = [System.IO.Path]::GetFullPath((Join-Path $PSScriptRoot ".."))
+$dotEnvPath = Join-Path $repositoryRoot ".env"
+Import-DashScopeApiKeyFromDotEnv -Path $dotEnvPath
 $validator = Join-Path $repositoryRoot "evaluation/validate_dataset.py"
 $assetPreparer = Join-Path $repositoryRoot "backend/scripts/prepare_deepdoc_assets.py"
 $evaluationRunner = Join-Path $repositoryRoot "backend/scripts/run_evaluation.py"
@@ -39,8 +73,15 @@ $outputPath = if ([System.IO.Path]::IsPathRooted($Output)) {
 else {
     [System.IO.Path]::GetFullPath((Join-Path $repositoryRoot $Output))
 }
+$developmentReportPath = if ([System.IO.Path]::IsPathRooted($DevelopmentReport)) {
+    [System.IO.Path]::GetFullPath($DevelopmentReport)
+}
+else {
+    [System.IO.Path]::GetFullPath((Join-Path $repositoryRoot $DevelopmentReport))
+}
 Assert-NotTemporaryPath -PathValue $modelPath
 Assert-NotTemporaryPath -PathValue $outputPath
+Assert-NotTemporaryPath -PathValue $developmentReportPath
 
 Push-Location $repositoryRoot
 try {
@@ -67,6 +108,8 @@ try {
     & conda run --no-capture-output -n $CondaEnvironment python $evaluationRunner `
         --model-dir $modelPath `
         --elasticsearch-url $ElasticsearchUrl `
+        --stage $Stage `
+        --development-report $developmentReportPath `
         --output $outputPath
     if ($LASTEXITCODE -ne 0) {
         throw "VERIFIED_SYNTHETIC online evaluation or its effect gates failed."
@@ -76,4 +119,4 @@ finally {
     Pop-Location
 }
 
-Write-Host "VERIFIED_SYNTHETIC metrics written to $outputPath"
+Write-Host "Evaluation stage '$Stage' written to $outputPath"

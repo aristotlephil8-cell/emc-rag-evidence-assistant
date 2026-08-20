@@ -6,7 +6,7 @@ All measurements generated from the committed fixtures must be labeled **`VERIFI
 
 所有由仓库内 fixtures 生成的指标必须标记为 **`VERIFIED_SYNTHETIC`**。该标签只表示结果来自冻结的公开合成语料，不表示真实标准覆盖、实验室认可、用户试用、生产效果或历史职责。
 
-**Current snapshot / 当前快照：`NOT_RUN / NOT_VERIFIED`.** `artifacts/evaluation/latest.json` does not exist, so this document defines the protocol but reports no metric value or improvement claim.
+**Current snapshot / 当前快照：`VERIFIED_SYNTHETIC / PASSED`.** The committed [`artifacts/evaluation/latest.json`](../artifacts/evaluation/latest.json) records one DashScope run against the frozen public corpus, including configuration/corpus hashes, metrics, gates, and limitations. It is not evidence for real standards, private material, historical trials, or production performance.
 
 ## Frozen corpus / 冻结语料
 
@@ -103,4 +103,4 @@ Run the online synthetic evaluation only after:
 .\scripts\evaluate.ps1
 ```
 
-The expected public artifact path is `artifacts/evaluation/latest.json`; per-variant predictions are written below `artifacts/evaluation/predictions/`. Until a valid artifact exists, `/api/v1/evaluation/latest` returns `status=not_run` and `evidence_status=NOT_VERIFIED`.
+The public artifact path is `artifacts/evaluation/latest.json`; per-variant predictions are written below `artifacts/evaluation/predictions/`. When the report is missing or invalid, `/api/v1/evaluation/latest` returns `status=not_run` and `evidence_status=NOT_VERIFIED` rather than presenting an effectiveness claim.

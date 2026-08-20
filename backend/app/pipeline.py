@@ -9,7 +9,7 @@ from app.config import Settings
 from app.ingestion.versions import PARSER_BUNDLE_VERSION
 from app.search import INITIAL_LIMIT, RERANK_LIMIT, RRF_K, QueryRouter
 
-MAPPING_VERSION = "mapping-v3-blue-green"
+MAPPING_VERSION = "mapping-v4-table-locator"
 RUNTIME_CONFIG_SCHEMA_VERSION = 1
 
 

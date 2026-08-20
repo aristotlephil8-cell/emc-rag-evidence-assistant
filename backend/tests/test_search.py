@@ -6,6 +6,7 @@ from app.models import RetrievalRequest, RetrievalVariant, SourceLocator
 from app.providers import FakeProvider, ProviderError
 from app.search import (
     Candidate,
+    ElasticsearchIndex,
     QueryRouter,
     RetrievalService,
     weighted_rrf,
@@ -93,3 +94,11 @@ def test_rerank_failure_degrades_to_rrf_without_hiding_failure() -> None:
 def test_rrf_rejects_ambiguous_weights() -> None:
     with pytest.raises(ValueError, match="sum to 1"):
         weighted_rrf([], [], 0.7, 0.7)
+
+
+def test_strict_mapping_keeps_table_index_as_a_locator_field() -> None:
+    mapping = ElasticsearchIndex(None, "locator-test", 8, "locator-v1").mapping
+    properties = mapping["properties"]
+
+    assert properties["table_index"] == {"type": "integer"}
+    assert properties["table_row"] == {"type": "integer"}

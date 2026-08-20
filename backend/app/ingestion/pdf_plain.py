@@ -160,6 +160,43 @@ def _merge_text_objects(regions: list[_TextRegion]) -> list[_TextRegion]:
     return merged
 
 
+def _merge_adjacent_lines(regions: list[_TextRegion]) -> list[_TextRegion]:
+    """Join wrapped text lines while preserving a compact, content-only bbox."""
+    ordered = sorted(regions, key=lambda region: (region.bbox[1], region.bbox[0], region.text))
+    blocks: list[list[_TextRegion]] = []
+    for region in ordered:
+        if not blocks:
+            blocks.append([region])
+            continue
+        current = blocks[-1]
+        current_bbox = _union_bbox(current)
+        current_height = current_bbox[3] - current_bbox[1]
+        region_height = region.bbox[3] - region.bbox[1]
+        vertical_gap = region.bbox[1] - current_bbox[3]
+        left_alignment = abs(region.bbox[0] - current_bbox[0])
+        same_column = left_alignment <= max(4.0, min(current_height, region_height) * 0.5)
+        wrapped_line = vertical_gap <= max(8.0, min(current_height, region_height) * 1.2)
+        if same_column and wrapped_line:
+            current.append(region)
+        else:
+            blocks.append([region])
+
+    merged: list[_TextRegion] = []
+    for block in blocks:
+        text = " ".join(region.text.strip() for region in block if region.text.strip()).strip()
+        if not text:
+            continue
+        merged.append(
+            _TextRegion(
+                text=text,
+                bbox=_union_bbox(block),
+                object_count=sum(region.object_count for region in block),
+                extraction_source=block[0].extraction_source,
+            )
+        )
+    return merged
+
+
 def _extract_text_regions(
     page: pypdfium2.PdfPage,
     text_page: pypdfium2.PdfTextPage,
@@ -188,7 +225,7 @@ def _extract_text_regions(
         except Exception:
             continue
     if regions:
-        return _merge_text_objects(regions)
+        return _merge_adjacent_lines(_merge_text_objects(regions))
 
     try:
         rectangle_count = text_page.count_rects()
@@ -211,7 +248,7 @@ def _extract_text_regions(
             )
         except Exception:
             continue
-    return _merge_text_objects(regions)
+    return _merge_adjacent_lines(_merge_text_objects(regions))
 
 
 def _vector_table_layout(page: pypdfium2.PdfPage) -> bool:
@@ -304,8 +341,8 @@ def _page_sections(
                     "text_object_count": region.object_count,
                     "extraction_source": region.extraction_source,
                     "coordinate_space": "pdf_points_top_left",
-                    "bbox_precision": "object_line",
-                    "locator_version": "pdf-text-object-v1",
+                    "bbox_precision": "tight_text_block",
+                    "locator_version": "pdf-text-block-v2",
                     "table_structure_used": False,
                 },
             )

@@ -91,3 +91,29 @@ def test_failed_reingest_restores_previous_ready_record(tmp_path) -> None:
     assert restored.status == DocumentStatus.READY
     assert restored.chunk_count == 1
     assert restored.error_code is None
+
+
+def test_trusted_preparsed_ingestion_reuses_document_chunking_and_indexing(tmp_path) -> None:
+    settings = Settings(CVRAG_DATABASE_URL=f"sqlite:///{tmp_path / 'cvrag.db'}")
+    repository = DocumentRepository(settings.database_path)
+    repository.initialize()
+    index = StubIndex()
+    provider = StubProvider()
+    parsed = StubParser().parse("private.pdf", b"ignored", settings.CVRAG_MODEL_DIR)
+
+    class FailingParser:
+        def parse(self, filename, content, model_dir):
+            raise AssertionError((filename, content, model_dir))
+
+    service = DocumentService(
+        settings,
+        repository,
+        index,  # type: ignore[arg-type]
+        provider,
+        FailingParser(),  # type: ignore[arg-type]
+    )
+
+    response = service.ingest_preparsed("private.pdf", b"private-content", parsed)
+
+    assert response.document.status == DocumentStatus.READY
+    assert response.document.chunk_count == 1

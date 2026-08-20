@@ -101,7 +101,7 @@ async def lifespan(_: FastAPI):
 
 
 app = FastAPI(
-    title="CVRAG",
+    title="EMC_RAG",
     version="0.1.0",
     description="Evidence-grounded EMC retrieval and citation demo",
     lifespan=lifespan,

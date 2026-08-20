@@ -74,6 +74,12 @@ class _LayoutBox:
     bbox_pixels: tuple[float, float, float, float]
 
 
+@dataclass(frozen=True)
+class _TableRow:
+    cells: tuple[str, ...]
+    bbox_pixels: tuple[float, float, float, float]
+
+
 def _session(path: Path) -> onnxruntime.InferenceSession:
     options = onnxruntime.SessionOptions()
     options.enable_cpu_mem_arena = False
@@ -460,32 +466,100 @@ def _escape_cell(value: str) -> str:
     return value.replace("\\", "\\\\").replace("|", "\\|").replace("\n", "<br>")
 
 
-def _fallback_table_cells(boxes: list[_OcrBox]) -> list[list[str]]:
-    ordered = sorted(boxes, key=lambda box: (box.bbox_pixels[1], box.bbox_pixels[0], box.text))
-    heights = [box.bbox_pixels[3] - box.bbox_pixels[1] for box in ordered]
-    tolerance = max(3.0, float(np.median(heights)) * 0.65)
-    rows: list[list[_OcrBox]] = []
-    for box in ordered:
-        center = (box.bbox_pixels[1] + box.bbox_pixels[3]) / 2
-        if not rows:
-            rows.append([box])
-            continue
-        previous_center = float(
-            np.mean([(value.bbox_pixels[1] + value.bbox_pixels[3]) / 2 for value in rows[-1]])
+def _render_table_cells(boxes: list[_OcrBox]) -> tuple[str, ...]:
+    return tuple(
+        _escape_cell(box.text.strip())
+        for box in sorted(boxes, key=lambda item: item.bbox_pixels[0])
+    )
+
+
+def _pad_table_rows(rows: list[_TableRow]) -> list[_TableRow]:
+    column_count = max(len(row.cells) for row in rows)
+    return [
+        _TableRow(
+            cells=row.cells + ("",) * (column_count - len(row.cells)),
+            bbox_pixels=row.bbox_pixels,
         )
-        if abs(center - previous_center) <= tolerance:
-            rows[-1].append(box)
-        else:
-            rows.append([box])
-    cells = [
-        [
-            _escape_cell(box.text.strip())
-            for box in sorted(row, key=lambda item: item.bbox_pixels[0])
-        ]
         for row in rows
     ]
-    column_count = max(len(row) for row in cells)
-    return [row + [""] * (column_count - len(row)) for row in cells]
+
+
+def _grid_row_groups(
+    boxes: list[_OcrBox],
+    crop: np.ndarray,
+    *,
+    crop_origin: tuple[float, float],
+) -> list[list[_OcrBox]] | None:
+    """Recover vector-table row bands when the table model has no stable axes."""
+    if crop.size == 0:
+        return None
+    grayscale = cv2.cvtColor(crop, cv2.COLOR_BGR2GRAY)
+    _, foreground = cv2.threshold(grayscale, 200, 255, cv2.THRESH_BINARY_INV)
+    kernel_width = max(32, crop.shape[1] // 3)
+    horizontal = cv2.morphologyEx(
+        foreground,
+        cv2.MORPH_OPEN,
+        cv2.getStructuringElement(cv2.MORPH_RECT, (kernel_width, 1)),
+    )
+    projection = np.count_nonzero(horizontal, axis=1)
+    positions = np.flatnonzero(projection >= crop.shape[1] * 0.4)
+    if len(positions) < 2:
+        return None
+    centers: list[float] = []
+    start = previous = int(positions[0])
+    for position in positions[1:]:
+        current = int(position)
+        if current > previous + 1:
+            centers.append((start + previous) / 2)
+            start = current
+        previous = current
+    centers.append((start + previous) / 2)
+    if len(centers) < 2:
+        return None
+
+    groups: list[list[_OcrBox]] = []
+    assigned: set[_OcrBox] = set()
+    for top, bottom in zip(centers, centers[1:], strict=False):
+        values = [
+            box
+            for box in boxes
+            if top <= (box.bbox_pixels[1] + box.bbox_pixels[3]) / 2 - crop_origin[1] <= bottom
+        ]
+        if values:
+            groups.append(values)
+            assigned.update(values)
+    if not groups or len(assigned) != len(boxes):
+        return None
+    return groups
+
+
+def _fallback_table_rows(
+    boxes: list[_OcrBox],
+    crop: np.ndarray,
+    *,
+    crop_origin: tuple[float, float],
+) -> list[_TableRow]:
+    ordered = sorted(boxes, key=lambda box: (box.bbox_pixels[1], box.bbox_pixels[0], box.text))
+    groups = _grid_row_groups(ordered, crop, crop_origin=crop_origin)
+    if groups is None:
+        heights = [box.bbox_pixels[3] - box.bbox_pixels[1] for box in ordered]
+        tolerance = max(3.0, float(np.median(heights)) * 0.65)
+        groups = []
+        for box in ordered:
+            center = (box.bbox_pixels[1] + box.bbox_pixels[3]) / 2
+            if not groups:
+                groups.append([box])
+                continue
+            previous_center = float(
+                np.mean([(value.bbox_pixels[1] + value.bbox_pixels[3]) / 2 for value in groups[-1]])
+            )
+            if abs(center - previous_center) <= tolerance:
+                groups[-1].append(box)
+            else:
+                groups.append([box])
+    return _pad_table_rows(
+        [_TableRow(cells=_render_table_cells(row), bbox_pixels=_union_bbox(row)) for row in groups]
+    )
 
 
 def _stable_axes(structures: list[_LayoutBox], label: str) -> list[_LayoutBox]:
@@ -565,12 +639,12 @@ def _axis_index(
     return int(np.argmax(np.asarray(overlaps)))
 
 
-def _structured_table_cells(
+def _structured_table_rows(
     boxes: list[_OcrBox],
     structures: list[_LayoutBox],
     *,
     crop_origin: tuple[float, float],
-) -> list[list[str]] | None:
+) -> list[_TableRow] | None:
     if any(box.label == "table spanning cell" for box in structures):
         return None
     rows = _stable_axes(structures, "table row")
@@ -584,9 +658,10 @@ def _structured_table_cells(
         if row_index is None or column_index is None:
             return None
         cells[row_index][column_index].append(box)
-    rendered: list[list[str]] = []
-    for row in cells:
+    rendered: list[_TableRow] = []
+    for row_index, row in enumerate(cells):
         values: list[str] = []
+        row_boxes: list[_OcrBox] = []
         for cell in row:
             ordered = sorted(
                 cell,
@@ -597,8 +672,19 @@ def _structured_table_cells(
                 ),
             )
             values.append(_escape_cell(" ".join(value.text.strip() for value in ordered).strip()))
-        rendered.append(values)
-    return rendered
+            row_boxes.extend(cell)
+        if row_boxes:
+            bbox = _union_bbox(row_boxes)
+        else:
+            axis_bbox = rows[row_index].bbox_pixels
+            bbox = (
+                axis_bbox[0] + crop_origin[0],
+                axis_bbox[1] + crop_origin[1],
+                axis_bbox[2] + crop_origin[0],
+                axis_bbox[3] + crop_origin[1],
+            )
+        rendered.append(_TableRow(cells=tuple(values), bbox_pixels=bbox))
+    return _pad_table_rows(rendered)
 
 
 def _points_bbox(
@@ -810,14 +896,18 @@ def parse_deepdoc_pdf(
                             structures = _detect_table_structure(crop, table_session)
                         except Exception:
                             structures = []
-                        cells = _structured_table_cells(
+                        rows = _structured_table_rows(
                             values,
                             structures,
                             crop_origin=(float(crop_left), float(crop_top)),
                         )
-                        structure_used = cells is not None
-                        if cells is None:
-                            cells = _fallback_table_cells(values)
+                        structure_used = rows is not None
+                        if rows is None:
+                            rows = _fallback_table_rows(
+                                values,
+                                crop,
+                                crop_origin=(float(crop_left), float(crop_top)),
+                            )
                             warnings.append(
                                 ParseWarning(
                                     code="pdf_table_fallback",
@@ -825,20 +915,25 @@ def parse_deepdoc_pdf(
                                     page_number=page_index + 1,
                                 )
                             )
-                        column_count = max(len(row) for row in cells)
-                        for row_number, row in enumerate(cells, start=1):
+                        column_count = max(len(row.cells) for row in rows)
+                        for row_number, row in enumerate(rows, start=1):
                             sections.append(
                                 ParsedSection(
-                                    text="| " + " | ".join(row) + " |",
+                                    text="| " + " | ".join(row.cells) + " |",
                                     block_type=BlockType.TABLE,
                                     page_number=page_index + 1,
                                     section_path=tuple(section_path),
-                                    bbox=bbox,
+                                    bbox=_points_bbox(
+                                        row.bbox_pixels,
+                                        scale,
+                                        page_width,
+                                        page_height,
+                                    ),
                                     table_row=row_number,
                                     metadata={
                                         "region_index": region_index,
                                         "table_index": table_index,
-                                        "row_count": len(cells),
+                                        "row_count": len(rows),
                                         "column_count": column_count,
                                         "table_structure_used": structure_used,
                                         "layout_type": label,

@@ -14,11 +14,11 @@ Push-Location $repositoryRoot
 try {
     & docker compose --file $composeFile down --remove-orphans
     if ($LASTEXITCODE -ne 0) {
-        throw "CVRAG shutdown failed."
+        throw "EMC_RAG shutdown failed."
     }
 }
 finally {
     Pop-Location
 }
 
-Write-Host "CVRAG containers stopped. Named data and model volumes were preserved."
+Write-Host "EMC_RAG containers stopped. Named data and model volumes were preserved."

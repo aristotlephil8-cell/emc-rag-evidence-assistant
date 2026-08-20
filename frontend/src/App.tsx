@@ -19,7 +19,7 @@ export default function App() {
         <EvaluationPanel />
       )}
       <footer className="app-footer">
-        <span>CVRAG · Public Synthetic Demo</span>
+        <span>EMC_RAG · Public Synthetic Demo</span>
         <span>FastAPI · React · Elasticsearch · SQLite</span>
         <span>Evidence before confidence.</span>
       </footer>

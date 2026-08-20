@@ -22,7 +22,7 @@ export function AppHeader({ activeView, onViewChange }: AppHeaderProps) {
             <span className="brand-pulse" />
           </span>
           <span className="brand-copy">
-            <strong>CVRAG</strong>
+            <strong>EMC_RAG</strong>
             <span>EMC Evidence Engine</span>
           </span>
         </button>
