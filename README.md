@@ -1,29 +1,42 @@
-# CVRAG · EMC Evidence Assistant
+# EMC_RAG · EMC Evidence Assistant
 
-面向电磁兼容（EMC）试验知识的可复现、证据优先 RAG 展示项目。CVRAG 将多格式文档解析、混合检索、重排、结构化引用校验与拒答闭环放在一个可公开审查的 Demo 中。
+面向电磁兼容（EMC）试验知识的可复现、证据优先 RAG 展示项目。EMC_RAG 将多格式文档解析、混合检索、重排、结构化引用校验与拒答闭环放在一个可公开审查的 Demo 中。
 
-An evidence-first, reproducible RAG demo for electromagnetic-compatibility (EMC) knowledge. CVRAG combines multi-format ingestion, hybrid retrieval, reranking, citation validation, and fail-closed answering in a public-reviewable application.
+An evidence-first, reproducible RAG demo for electromagnetic-compatibility (EMC) knowledge. EMC_RAG combines multi-format ingestion, hybrid retrieval, reranking, citation validation, and fail-closed answering in a public-reviewable application.
 
 > **Public evidence status / 公开证据状态：`VERIFIED_SYNTHETIC / PASSED`**<br>
 > 当前提交包含可复现的公开合成评测报告。它只证明 committed fixtures 上的当次结果，不证明真实标准覆盖、实验室认可、历史职责、用户试用或生产效果。
 
 [![CI](https://github.com/aristotlephil8-cell/emc-rag-evidence-assistant/actions/workflows/ci.yml/badge.svg)](https://github.com/aristotlephil8-cell/emc-rag-evidence-assistant/actions/workflows/ci.yml)
 
-[中文](#中文) · [English](#english) · [面试审阅指南](docs/PORTFOLIO.md) · [Architecture](docs/ARCHITECTURE.md) · [Evaluation](docs/EVALUATION.md) · [Security](docs/SECURITY.md)
+[中文](#中文) · [English](#english) · [面试审阅指南](docs/PORTFOLIO.md) · [Architecture](docs/ARCHITECTURE.md) · [Evaluation](docs/EVALUATION.md) · [Badcases](docs/BADCASES.md) · [Security](docs/SECURITY.md)
 
 ## 中文
 
 ### 项目定位
 
-CVRAG 是秋招作品集用途的公开工程 Demo，不是生产系统、实验室认可工具或真实标准数据库。冻结评测资料是虚构的合成 EMC 教学资料；另有一组独立的公开真实参考 PDF（见 `datasets/public_real/`），并附来源、许可边界与哈希。仓库不包含个人简历、客户资料、内部试验记录、付费标准全文、凭据或本地参考项目痕迹。
+EMC_RAG 是简历项目中可公开展示的工程与验证部分，不是生产系统、实验室认可工具或真实标准数据库。冻结评测资料是虚构的合成 EMC 教学资料；另有一组独立的公开真实参考 PDF（见 `datasets/public_real/`），并附来源、许可边界与哈希。仓库不包含个人简历、客户资料、内部试验记录、付费标准全文、凭据或本地参考项目痕迹。
+
+### 个人贡献与公开边界
+
+我在 EMC_RAG 项目中担任核心开发。本仓库展示以下可公开的职责、工程实现与验证证据：
+
+| 个人贡献 | 公开可审查入口 |
+| --- | --- |
+| 文档解析入库：OCR、结构感知切分、元数据管理、幂等写入与索引版本管理 | [`backend/app/ingestion/`](backend/app/ingestion/)、[`backend/app/services.py`](backend/app/services.py) |
+| 混合检索与精排：BM25、向量检索、RRF、精确/语义查询分流与 Reranker | [`backend/app/search.py`](backend/app/search.py) |
+| 引用校验与拒答：来源/页码/条款定位、证据不足拒答和人工复核入口 | [`backend/app/providers.py`](backend/app/providers.py)、[`backend/app/services.py`](backend/app/services.py) |
+| 分层评测与回归：解析、检索、精排、生成和引用链路的冻结评测与回归测试 | [`evaluation/`](evaluation/)、[`backend/tests/`](backend/tests/) |
+
+公开边界：仓库仅保留可公开的合成资料、代码、测试、来源说明和脱敏报告；历史项目的内部文档、原始评测集与试用日志不发布。因此，仓库内的公开合成结果与简历中的历史结果分别陈述、互不替代。
 
 ### 90 秒审阅路径
 
 如果你是招聘方或面试官，建议按下面顺序阅读：
 
 1. 先看截图和下方五项能力，确认项目解决的问题与产品形态。
-2. 再看公开合成评测卡片，区分“本仓库当次可复现实验”和“简历中的历史项目陈述”。
-3. 最后沿着 [面试审阅指南](docs/PORTFOLIO.md) 进入入口代码、架构、Badcase 和评测协议。
+2. 再看公开合成评测卡片，区分“仓库当次可复现实验”和“EMC_RAG 项目历史结果”。
+3. 最后沿着 [面试审阅指南](docs/PORTFOLIO.md) 进入入口代码、架构、[Badcase](docs/BADCASES.md) 和评测协议。
 
 | 本仓库公开合成评测（`VERIFIED_SYNTHETIC`） | 当次结果 |
 | --- | ---: |
@@ -36,9 +49,9 @@ CVRAG 是秋招作品集用途的公开工程 Demo，不是生产系统、实验
 指标来自 [`artifacts/evaluation/latest.json`](artifacts/evaluation/latest.json) 的一次固定配置、固定公开合成语料运行。请勿将其外推到真实 EMC 标准、私有资料或生产流量。
 
 <details>
-<summary>简历历史项目上下文（不属于本仓库的可复现评测）</summary>
+<summary>EMC_RAG 项目历史结果（不属于本仓库的可复现评测）</summary>
 
-以下是简历中 `2023.05–2024.05` emcRAG 历史项目的陈述，保留在此只用于帮助面试官理解履历与公开 Demo 的关系；原始文档、评测集和运行日志未随仓库发布，因此**不能**作为本仓库效果证据。
+以下是简历中 `2023.05–2024.05` EMC_RAG 项目的历史结果，保留在此只用于帮助面试官理解履历与公开展示部分的关系；原始文档、评测集和运行日志未随仓库发布，因此**不能**作为本仓库效果证据。
 
 | 简历陈述范围 | 简历报告指标 |
 | --- | --- |
@@ -47,11 +60,11 @@ CVRAG 是秋招作品集用途的公开工程 Demo，不是生产系统、实验
 | 80 个固定问题、前后各 250 组原子主张-引用关系 | 引用准确率 92.4%；无证据主张占比 16.8% → 5.6% |
 | 12 人连续 4 周、3,200 次请求 | P95 TTFT 1.85 s；端到端成功率 99.2% |
 
-公开仓库展示的是同类“证据优先 RAG”工程实现与独立公开合成评测，不是历史系统的源代码归档或复现证明。
+公开仓库展示的是 EMC_RAG 项目可公开的“证据优先 RAG”工程实现与独立公开合成评测，不是完整历史系统的源代码归档，也不替代历史结果的原始证据。
 
 </details>
 
-![CVRAG fake-provider workspace](docs/assets/fake-workspace.png)
+![EMC_RAG fake-provider workspace](docs/assets/fake-workspace.png)
 
 上图来自本机 fake Provider 的实际工作区：展示文档状态、上传边界和问答界面；不展示、也不证明在线模型效果或评测指标。
 
@@ -64,7 +77,7 @@ CVRAG 是秋招作品集用途的公开工程 Demo，不是生产系统、实验
 - 标准号、条款号、型号、数值单位型查询使用 `0.7 lexical / 0.3 vector`；一般语义查询使用 `0.3 / 0.7`。
 - 候选 Top 30 进入 Qwen3 Rerank，最终返回 Top 5；重排失败会显式降级，问答链路 fail closed。
 - 生成模型先返回 `claims + citation_ids`；服务端逐条校验引用。证据不足返回 `insufficient_evidence`，引用、结构或检索异常返回 `needs_review`。
-- React 展示文档状态、检索分数轨迹、来源定位、评测方案与 Badcase。
+- React 展示文档状态、检索分数轨迹、来源定位、评测方案与 [Badcase](docs/BADCASES.md)。
 
 详细数据流、索引生命周期和故障边界见 [架构说明](docs/ARCHITECTURE.md)。
 
@@ -150,8 +163,8 @@ DashScope 展示模式会读取已通过评测报告中的 `runtime_config + con
 校验数据契约：
 
 ```powershell
-conda create -n cvrag python=3.11 -y
-conda run --no-capture-output -n cvrag python -m pip install -e "backend[dev]"
+conda create -n emc_rag python=3.11 -y
+conda run --no-capture-output -n emc_rag python -m pip install -e "backend[dev]"
 .\scripts\evaluate.ps1 -ValidateOnly
 ```
 
@@ -189,7 +202,7 @@ conda run --no-capture-output -n cvrag python -m pip install -e "backend[dev]"
 
 ### Scope
 
-CVRAG is a public portfolio demo, not a production service, accredited laboratory tool, or repository of real standards. It contains only fictional synthetic EMC teaching fixtures—no resume, customer material, internal test record, credential, full standard text, or local reference-project trace.
+EMC_RAG is the publicly shareable engineering and validation portion of the resume project. It is not a production service, accredited laboratory tool, or repository of real standards. It contains only fictional synthetic EMC teaching fixtures—no resume, customer material, internal test record, credential, full standard text, or local reference-project trace.
 
 The implemented flow supports PDF/DOCX/UTF-8 TXT ingestion; text-first PDF parsing with whole-document DeepDOC fallback for scans, tables, and complex layouts; SHA-256 document identity; stable source locators; SQLite lifecycle metadata; Elasticsearch BM25 and 1024-dimensional kNN retrieval; weighted RRF; Qwen3 reranking; structured claims; server-side citation validation; and fail-closed refusal/review states. Frozen evaluation fixtures are synthetic; separately curated public-real references live in `datasets/public_real/` with provenance and rights boundaries.
 
@@ -229,8 +242,8 @@ The five variants are BM25, Vector, Hybrid RRF, Hybrid RRF + Rerank, and Routed 
 
 Start with the workspace screenshot, then the [reviewer guide](docs/PORTFOLIO.md), the [architecture](docs/ARCHITECTURE.md), and the committed [`latest.json`](artifacts/evaluation/latest.json). The current public result is **`VERIFIED_SYNTHETIC / PASSED`** on the committed synthetic fixtures: Parser success is 100%; the routed final variant has Evidence Recall@5 / MRR@10 / nDCG@5 of 100% / 1.000 / 1.000; and server-side citation-ID validity is 100%.
 
-These numbers do not establish real-standard coverage, accreditation, production performance, historical responsibility, user trials, or production traffic. Resume-reported historical emcRAG metrics are deliberately separated in the Chinese reviewer section and are not reproduced by this repository.
+These numbers do not establish real-standard coverage, accreditation, production performance, historical responsibility, user trials, or production traffic. Historical EMC_RAG project results are deliberately separated in the Chinese reviewer section and are not reproduced by this repository.
 
 ### License
 
-CVRAG is licensed under Apache-2.0. DeepDOC/RAGFlow provenance, pinned model revision, asset verification, and modifications are documented in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). Model binaries are downloaded by the operator and intentionally excluded from Git.
+EMC_RAG is licensed under Apache-2.0. DeepDOC/RAGFlow provenance, pinned model revision, asset verification, and modifications are documented in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md). Model binaries are downloaded by the operator and intentionally excluded from Git.

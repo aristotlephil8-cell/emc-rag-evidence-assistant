@@ -1,10 +1,10 @@
-# CVRAG Architecture / 架构说明
+# EMC_RAG Architecture / 架构说明
 
 ## System boundary / 系统边界
 
-CVRAG is a single-user public demo composed of a React/Vite frontend, FastAPI backend, Elasticsearch 8.11.3, and SQLite. It intentionally omits authentication, multi-tenancy, PostgreSQL, Redis, and an asynchronous queue.
+EMC_RAG is a single-user public demo composed of a React/Vite frontend, FastAPI backend, Elasticsearch 8.11.3, and SQLite. It intentionally omits authentication, multi-tenancy, PostgreSQL, Redis, and an asynchronous queue.
 
-CVRAG 是由 React/Vite 前端、FastAPI 后端、Elasticsearch 8.11.3 和 SQLite 组成的单用户公开 Demo。它有意不加入认证、多租户、PostgreSQL、Redis 或异步队列。
+EMC_RAG 是由 React/Vite 前端、FastAPI 后端、Elasticsearch 8.11.3 和 SQLite 组成的单用户公开 Demo。它有意不加入认证、多租户、PostgreSQL、Redis 或异步队列。
 
 ```mermaid
 flowchart TB
@@ -135,7 +135,7 @@ Terminal states:
 | Provider | Purpose | Evidence label |
 | --- | --- | --- |
 | `fake` | Deterministic API, UI, unit-test and CI scaffolding | `IMPLEMENTED_FAKE_VERIFIED`; never effectiveness evidence |
-| `dashscope` | `text-embedding-v4`, `qwen3-rerank`, `qwen3.7-plus-2026-05-26` | Runtime remains unassessed until a reproducible report exists |
+| `dashscope` | `text-embedding-v4`, `qwen3-rerank`, `qwen3.7-plus-2026-05-26` | `VERIFIED_SYNTHETIC` only for the committed public evaluation report; not real-standard, private-corpus, or production evidence |
 
 DashScope mode is an outbound-data boundary. See [SECURITY.md](SECURITY.md).
 

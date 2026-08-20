@@ -1,8 +1,8 @@
 # Security and Data Boundary / 安全与数据边界
 
-CVRAG is a local portfolio demo. It does not implement authentication, authorization, multi-tenancy, tenant isolation, audit retention, or production-grade secret management. Do not expose it directly to an untrusted network or treat it as a production deployment template.
+EMC_RAG is a local portfolio demo. It does not implement authentication, authorization, multi-tenancy, tenant isolation, audit retention, or production-grade secret management. Do not expose it directly to an untrusted network or treat it as a production deployment template.
 
-CVRAG 是本地作品集 Demo，不包含认证、授权、多租户、租户隔离、审计留存或生产级密钥管理。不要把它直接暴露到不可信网络，也不要当作生产部署模板。
+EMC_RAG 是本地作品集 Demo，不包含认证、授权、多租户、租户隔离、审计留存或生产级密钥管理。不要把它直接暴露到不可信网络，也不要当作生产部署模板。
 
 ## Outbound data / 数据外发
 

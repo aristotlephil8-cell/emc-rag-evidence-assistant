@@ -1,6 +1,6 @@
-# CVRAG Reviewer Guide
+# EMC_RAG Reviewer Guide
 
-This page is the shortest path from a GitHub link to an interview-ready technical discussion. CVRAG is a public portfolio implementation of an evidence-first EMC RAG workflow; it is not an archive of a historical internal system and contains no private EMC material.
+This page is the shortest path from a GitHub link to an interview-ready technical discussion. EMC_RAG is the publicly shareable engineering and validation portion of the resume project; it contains no private EMC material and is not a complete archive of the historical system.
 
 ## Read the repository in 90 seconds
 
@@ -27,6 +27,19 @@ PDF / DOCX / TXT
 
 This is deliberately narrower than a production platform: no authentication, multi-tenancy, queue, PostgreSQL, Redis, or private corpus is claimed. The narrow scope makes the ingestion, retrieval, citation, and evaluation decisions inspectable.
 
+## Candidate contribution and ownership boundary
+
+The candidate served as core developer for the EMC_RAG project. This repository makes four parts inspectable:
+
+| Contribution | Evidence in this repository | Boundary |
+| --- | --- | --- |
+| OCR, structure-aware parsing, metadata, idempotent writes, and index versions | [`backend/app/ingestion/`](../backend/app/ingestion/), [`backend/app/services.py`](../backend/app/services.py) | Public synthetic fixtures only |
+| BM25/vector retrieval, RRF, query routing, and reranking | [`backend/app/search.py`](../backend/app/search.py) | Public-synthetic effectiveness is separate from historical results |
+| Citation binding, insufficient-evidence refusal, and review state | [`backend/app/providers.py`](../backend/app/providers.py), [`backend/app/services.py`](../backend/app/services.py) | Citation identity validation is not semantic truth proof |
+| Layered evaluation and regression tests | [`evaluation/`](../evaluation/), [`backend/tests/`](../backend/tests/) | Historical corpus and trial logs are not published |
+
+DeepDOC/RAGFlow-derived components and model assets are attributed in [`THIRD_PARTY_NOTICES.md`](../THIRD_PARTY_NOTICES.md). The repository does not claim ownership of those upstream assets.
+
 ## Code map for interview questions
 
 | Question an interviewer may ask | Starting point |
@@ -45,18 +58,15 @@ The committed report is `VERIFIED_SYNTHETIC / PASSED` on 16 logical synthetic do
 
 Those numbers are reproducible only under the committed public-synthetic protocol and the report's fixed model/configuration hash. They are not claims about real EMC standards, private material, accredited laboratory use, users, or production traffic.
 
-### Resume-reported historical context
+### EMC_RAG project historical results
 
-The resume describes an emcRAG project from May 2023 to May 2024. Its stated measurements include 160 documents (parser acceptance 82.5% to 95.6%), 120 questions / 164 required evidence identities (Evidence Recall@5 68.3% to 84.1%, MRR 0.56 to 0.74), and 80 fixed questions with atomized citation review (citation accuracy 92.4%, unsupported-claim rate 16.8% to 5.6%). It also reports a 12-person, four-week, 3,200-request trial.
+The EMC_RAG project from May 2023 to May 2024 reports 160 documents (parser acceptance 82.5% to 95.6%), 120 questions / 164 required evidence identities (Evidence Recall@5 68.3% to 84.1%, MRR 0.56 to 0.74), and 80 fixed questions with atomized citation review (citation accuracy 92.4%, unsupported-claim rate 16.8% to 5.6%). It also reports a 12-person, four-week, 3,200-request trial.
 
-These are **resume-reported historical measurements**, not outputs reproduced by this repository. The historical corpus, logs, and raw annotations are not published here. Do not compare them numerically with the current public-synthetic report or cite this repository as their source of proof.
+These are **historical project measurements**, not outputs reproduced by this repository. The historical corpus, logs, and raw annotations are not published here. Do not compare them numerically with the current public-synthetic report or cite this repository as their source of proof.
 
-## Deliberate Badcase and trade-offs
+## Badcases and trade-offs
 
-- A low top-evidence score returns `insufficient_evidence`; the system does not synthesize a confident answer.
-- Retrieval degradation returns `needs_review` rather than silently falling back to a different quality level.
-- Citation IDs must be in the server-offered allow-list. A malformed or out-of-set ID fails validation.
-- The public corpus is synthetic by design. Public real reference PDFs are demonstrative only and are not mixed into the frozen benchmark.
+See [Badcases](BADCASES.md) for the condition, symptom, root cause, change, verification, and remaining boundary of the public locator-regression case. In normal operation, a low top-evidence score returns `insufficient_evidence`; retrieval degradation or invalid citations return `needs_review` rather than silently lowering the evidence bar.
 
 ## Run it locally
 

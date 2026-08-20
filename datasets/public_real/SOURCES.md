@@ -7,7 +7,7 @@
 - 文件：`documents/msfc-spec-521-rev-d-2025.pdf`
 - 标题：*Electromagnetic Compatibility Requirements for Equipment and Subsystems*，Revision D，2025-06-13。
 - 原始地址：[NASA Standards](https://standards.nasa.gov/system/files/tmp/MSFC-SPEC-521_RevD_Approved_2025-06-13.pdf)
-- 再分发依据：原件首页明确标注“Approved for Public Release; Distribution is Unlimited”。文件保持未修改；原件权利与声明均保留，不适用 CVRAG 的 Apache-2.0 许可证。
+- 再分发依据：原件首页明确标注“Approved for Public Release; Distribution is Unlimited”。文件保持未修改；原件权利与声明均保留，不适用 EMC_RAG 的 Apache-2.0 许可证。
 - 范围：NASA 任务/设备语境下的 EMC 要求与测试方法示例；不可作为通用产品认证或中国市场合规结论。
 - SHA-256：`8A0E86E250F9CB2EAB719629D7C3687541762FEB9F341DF87BC4865020AE8FE1`
 
