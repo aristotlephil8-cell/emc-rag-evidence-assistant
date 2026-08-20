@@ -57,6 +57,7 @@ _TABLE_LABELS = (
     "table spanning cell",
     "table grid cell",
 )
+_TABLE_AXIS_MIN_CONFIDENCE = 0.30
 
 
 @dataclass(frozen=True)
@@ -489,7 +490,11 @@ def _fallback_table_cells(boxes: list[_OcrBox]) -> list[list[str]]:
 
 def _stable_axes(structures: list[_LayoutBox], label: str) -> list[_LayoutBox]:
     axis = 1 if label == "table row" else 0
-    candidates = [box for box in structures if box.label == label and box.confidence >= 0.35]
+    candidates = [
+        box
+        for box in structures
+        if box.label == label and box.confidence >= _TABLE_AXIS_MIN_CONFIDENCE
+    ]
     candidates.sort(
         key=lambda box: (
             (box.bbox_pixels[axis] + box.bbox_pixels[axis + 2]) / 2,

@@ -12,6 +12,7 @@ from app.ingestion import (
     IngestionErrorCode,
     ParserService,
 )
+from app.ingestion.deepdoc import _LayoutBox, _stable_axes
 from app.ingestion.pdf_plain import PDF_MAX_BYTES
 from app.schemas.ingestion import BlockType, FileType
 
@@ -157,6 +158,25 @@ def test_vector_table_routes_complete_pdf_to_deepdoc() -> None:
             _pdf_bytes(["Frequency Limit"], vector_grid=True),
         )
     assert caught.value.code == IngestionErrorCode.MODEL_ASSET_MISSING
+
+
+def test_table_axis_keeps_verified_low_confidence_row() -> None:
+    structures = [
+        _LayoutBox(
+            label="table row",
+            confidence=0.319,
+            bbox_pixels=(0.0, 420.0, 640.0, 630.0),
+        ),
+        _LayoutBox(
+            label="table row",
+            confidence=0.299,
+            bbox_pixels=(0.0, 630.0, 640.0, 840.0),
+        ),
+    ]
+
+    rows = _stable_axes(structures, "table row")
+
+    assert [row.confidence for row in rows] == [0.319]
 
 
 def test_pdf_enforces_20_mib_limit_before_parsing() -> None:
