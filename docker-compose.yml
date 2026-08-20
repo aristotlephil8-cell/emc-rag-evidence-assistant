@@ -1,0 +1,108 @@
+name: cvrag
+
+services:
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.3
+    environment:
+      discovery.type: single-node
+      xpack.security.enabled: "false"
+      xpack.security.enrollment.enabled: "false"
+      ES_JAVA_OPTS: -Xms512m -Xmx512m
+    ports:
+      - "127.0.0.1:${CVRAG_ELASTICSEARCH_PORT:-9200}:9200"
+    volumes:
+      - elasticsearch-data:/usr/share/elasticsearch/data
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - curl --fail --silent 'http://127.0.0.1:9200/_cluster/health?wait_for_status=yellow&timeout=5s' >/dev/null
+      interval: 10s
+      timeout: 6s
+      retries: 12
+      start_period: 30s
+    mem_limit: 1g
+    restart: unless-stopped
+
+  deepdoc-assets:
+    build:
+      context: ./backend
+    command:
+      - python
+      - /app/scripts/prepare_deepdoc_assets.py
+      - --model-dir
+      - /app/models/deepdoc
+    volumes:
+      - ./backend/scripts:/app/scripts:ro
+      - deepdoc-models:/app/models/deepdoc
+    environment:
+      HF_HOME: /tmp/huggingface
+    read_only: true
+    tmpfs:
+      - /tmp:size=256m,mode=1777
+    mem_limit: 2g
+    restart: "no"
+
+  backend:
+    build:
+      context: ./backend
+    environment:
+      CVRAG_PROVIDER: ${CVRAG_PROVIDER:-fake}
+      DASHSCOPE_API_KEY: ${DASHSCOPE_API_KEY:-}
+      DASHSCOPE_BASE_URL: ${DASHSCOPE_BASE_URL:-https://dashscope.aliyuncs.com/compatible-mode/v1}
+      DASHSCOPE_RERANK_URL: ${DASHSCOPE_RERANK_URL:-https://dashscope.aliyuncs.com/compatible-api/v1/reranks}
+      EMBEDDING_MODEL: ${EMBEDDING_MODEL:-text-embedding-v4}
+      EMBEDDING_DIMENSION: ${EMBEDDING_DIMENSION:-1024}
+      RERANK_MODEL: ${RERANK_MODEL:-qwen3-rerank}
+      GENERATION_MODEL: ${GENERATION_MODEL:-qwen3.7-plus-2026-05-26}
+      ELASTICSEARCH_URL: http://elasticsearch:9200
+      CVRAG_DATABASE_URL: sqlite:////app/data/runtime/cvrag.db
+      CVRAG_MODEL_DIR: /app/models/deepdoc
+      CVRAG_EVALUATION_REPORT: /app/artifacts/evaluation/latest.json
+      CVRAG_REQUIRE_EVALUATION_LOCK: ${CVRAG_REQUIRE_EVALUATION_LOCK:-true}
+      CVRAG_ALLOWED_ORIGINS: ${CVRAG_ALLOWED_ORIGINS:-http://localhost:5173}
+    ports:
+      - "127.0.0.1:${CVRAG_BACKEND_PORT:-8000}:8000"
+    volumes:
+      - cvrag-runtime:/app/data/runtime
+      - deepdoc-models:/app/models/deepdoc:ro
+      - ./artifacts/evaluation:/app/artifacts/evaluation:ro
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      deepdoc-assets:
+        condition: service_completed_successfully
+    read_only: true
+    tmpfs:
+      - /tmp:size=256m,mode=1777
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=3)
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+    mem_limit: 2g
+    restart: unless-stopped
+
+  frontend:
+    build:
+      context: ./frontend
+    ports:
+      - "127.0.0.1:${CVRAG_FRONTEND_PORT:-5173}:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+    read_only: true
+    tmpfs:
+      - /var/cache/nginx:size=32m,mode=0775
+      - /var/run:size=8m,mode=0775
+      - /tmp:size=32m,mode=1777
+    restart: unless-stopped
+
+volumes:
+  cvrag-runtime:
+  deepdoc-models:
+  elasticsearch-data:
