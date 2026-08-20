@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import subprocess
 import unittest
 from pathlib import Path
 from unittest.mock import patch
@@ -17,9 +18,38 @@ from evaluation.validate_dataset import DatasetValidationError, validate_reposit
 
 
 REPO_ROOT = Path(__file__).resolve().parents[2]
+FROZEN_TEXT_IDENTITY_PATHS = (
+    "datasets/generated/canonical_facts.jsonl",
+    "datasets/generated/corpus_manifest.json",
+    "datasets/generated/documents/distractor_maintenance_calendar.txt",
+    "datasets/generated/documents/distractor_marketing_glossary.txt",
+    "datasets/generated/documents/distractor_retired_draft.txt",
+    "datasets/generated/documents/distractor_thermal_fixture.txt",
+    "datasets/generated/documents/synthetic_reporting_boundary.txt",
+    "datasets/scripts/generate_synthetic_corpus.py",
+    "evaluation/frozen_cases.jsonl",
+    "evaluation/freeze_manifest.json",
+)
 
 
 class DatasetContractTests(unittest.TestCase):
+    def test_frozen_identity_inputs_require_lf_checkout(self) -> None:
+        result = subprocess.run(
+            ["git", "check-attr", "eol", "--", *FROZEN_TEXT_IDENTITY_PATHS],
+            cwd=REPO_ROOT,
+            check=True,
+            capture_output=True,
+            text=True,
+        )
+        attributes = {
+            line.partition(": eol: ")[0]: line.partition(": eol: ")[2]
+            for line in result.stdout.splitlines()
+        }
+
+        self.assertEqual(attributes, {path: "lf" for path in FROZEN_TEXT_IDENTITY_PATHS})
+        for relative_path in FROZEN_TEXT_IDENTITY_PATHS:
+            self.assertNotIn(b"\r\n", (REPO_ROOT / relative_path).read_bytes(), relative_path)
+
     def test_committed_fixture_satisfies_full_contract(self) -> None:
         result = validate_repository(REPO_ROOT)
         self.assertEqual(result["status"], "valid")

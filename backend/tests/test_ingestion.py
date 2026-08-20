@@ -3,6 +3,7 @@ from __future__ import annotations
 import zipfile
 from io import BytesIO
 
+import numpy as np
 import pytest
 from docx import Document
 
@@ -12,7 +13,7 @@ from app.ingestion import (
     IngestionErrorCode,
     ParserService,
 )
-from app.ingestion.deepdoc import _LayoutBox, _stable_axes
+from app.ingestion.deepdoc import _fallback_table_rows, _LayoutBox, _OcrBox, _stable_axes
 from app.ingestion.pdf_plain import PDF_MAX_BYTES
 from app.schemas.ingestion import BlockType, FileType
 
@@ -147,7 +148,7 @@ def test_parse_plain_pdf_with_page_locator() -> None:
     assert parsed.sections[0].page_number == 1
     assert parsed.sections[0].bbox is not None
     assert parsed.sections[0].bbox != (0.0, 0.0, 612.0, 792.0)
-    assert parsed.sections[0].metadata["bbox_precision"] == "object_line"
+    assert parsed.sections[0].metadata["bbox_precision"] == "tight_text_block"
     assert "shielding" in parsed.sections[0].text
 
 
@@ -177,6 +178,30 @@ def test_table_axis_keeps_verified_low_confidence_row() -> None:
     rows = _stable_axes(structures, "table row")
 
     assert [row.confidence for row in rows] == [0.319]
+
+
+def test_fallback_table_rows_keep_wrapped_cells_in_one_grid_row() -> None:
+    crop = np.full((100, 120, 3), 255, dtype=np.uint8)
+    for y in (0, 25, 50, 75, 99):
+        crop[y : y + 1, :] = 0
+    boxes = [
+        _OcrBox("R1", 1.0, (20.0, 25.0, 35.0, 35.0)),
+        _OcrBox("first", 1.0, (70.0, 25.0, 95.0, 35.0)),
+        _OcrBox("R2", 1.0, (20.0, 52.0, 35.0, 62.0)),
+        _OcrBox("wrapped", 1.0, (70.0, 52.0, 105.0, 62.0)),
+        _OcrBox("text", 1.0, (70.0, 64.0, 90.0, 74.0)),
+        _OcrBox("R3", 1.0, (20.0, 78.0, 35.0, 88.0)),
+        _OcrBox("third", 1.0, (70.0, 78.0, 100.0, 88.0)),
+        _OcrBox("R4", 1.0, (20.0, 96.0, 35.0, 106.0)),
+        _OcrBox("fourth", 1.0, (70.0, 96.0, 110.0, 106.0)),
+    ]
+
+    rows = _fallback_table_rows(boxes, crop, crop_origin=(10.0, 20.0))
+
+    assert len(rows) == 4
+    assert rows[1].cells == ("R2", "wrapped", "text")
+    assert rows[1].bbox_pixels == (20.0, 52.0, 105.0, 74.0)
+    assert len({row.bbox_pixels for row in rows}) == 4
 
 
 def test_pdf_enforces_20_mib_limit_before_parsing() -> None:
@@ -209,5 +234,5 @@ def test_unsupported_extension_is_explicit() -> None:
 def test_parser_bundle_version_covers_every_parser_without_onnx_import() -> None:
     assert "txt=txt-1.0.0" in PARSER_BUNDLE_VERSION
     assert "docx=docx-1.1.0" in PARSER_BUNDLE_VERSION
-    assert "pdf=pdf-plain-1.1.0" in PARSER_BUNDLE_VERSION
-    assert "deepdoc=deepdoc-de0e793dc6d7-1.1.0" in PARSER_BUNDLE_VERSION
+    assert "pdf=pdf-plain-1.2.0" in PARSER_BUNDLE_VERSION
+    assert "deepdoc=deepdoc-de0e793dc6d7-1.2.0" in PARSER_BUNDLE_VERSION

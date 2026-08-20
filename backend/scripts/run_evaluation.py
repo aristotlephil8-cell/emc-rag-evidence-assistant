@@ -105,6 +105,31 @@ class LocatorResolver:
                     finally:
                         page.close()
 
+    def _normalized_pdf_bbox(self, hit: SearchHit) -> tuple[list[float], float] | None:
+        if hit.source.page_number is None or hit.source.bbox is None:
+            return None
+        page_size = self.page_sizes.get((hit.source.filename, hit.source.page_number))
+        if page_size is None:
+            return None
+        width, height = page_size
+        bbox = [
+            hit.source.bbox[0] / width,
+            hit.source.bbox[1] / height,
+            hit.source.bbox[2] / width,
+            hit.source.bbox[3] / height,
+        ]
+        area = max(0.0, bbox[2] - bbox[0]) * max(0.0, bbox[3] - bbox[1])
+        return (bbox, area) if area > 0 else None
+
+    def _covers_gold_bbox(self, hit: SearchHit, gold_bbox: object) -> bool:
+        normalized = self._normalized_pdf_bbox(hit)
+        if normalized is None or not isinstance(gold_bbox, list) or len(gold_bbox) != 4:
+            return False
+        bbox, hit_area = normalized
+        intersection_width = max(0.0, min(bbox[2], gold_bbox[2]) - max(bbox[0], gold_bbox[0]))
+        intersection_height = max(0.0, min(bbox[3], gold_bbox[3]) - max(bbox[1], gold_bbox[1]))
+        return intersection_width * intersection_height / hit_area >= 0.5
+
     def _section(self, hit: SearchHit) -> dict[str, Any] | None:
         document = self.documents.get(hit.source.filename)
         if document is None or document.get("role") != "primary":
@@ -113,17 +138,21 @@ class LocatorResolver:
         parser_locator = hit.source.parser_locator
 
         if hit.source.table_row is not None:
+            if hit.source.table_index is None:
+                return None
             matches = [
                 section
                 for section in sections
                 if section["region"].get("kind") == "table_row"
                 and section["region"].get("table_row") == hit.source.table_row
+                and section["region"].get("table_index", 1) == hit.source.table_index
                 and section["page_number"] == hit.source.page_number
             ]
             if len(matches) > 1:
                 raise LocatorResolutionError(f"ambiguous table row locator: {hit.chunk_id}")
-            if matches:
+            if matches and self._covers_gold_bbox(hit, matches[0]["region"].get("page_bbox")):
                 return matches[0]
+            return None
 
         paragraph_index = parser_locator.get("paragraph_index")
         if isinstance(paragraph_index, int):
@@ -153,23 +182,10 @@ class LocatorResolver:
             if matches:
                 return matches[0]
 
-        if hit.source.page_number is None or hit.source.bbox is None:
+        normalized = self._normalized_pdf_bbox(hit)
+        if normalized is None:
             return None
-        page_size = self.page_sizes.get((hit.source.filename, hit.source.page_number))
-        if page_size is None:
-            return None
-        width, height = page_size
-        normalized_bbox = [
-            hit.source.bbox[0] / width,
-            hit.source.bbox[1] / height,
-            hit.source.bbox[2] / width,
-            hit.source.bbox[3] / height,
-        ]
-        hit_area = max(0.0, normalized_bbox[2] - normalized_bbox[0]) * max(
-            0.0, normalized_bbox[3] - normalized_bbox[1]
-        )
-        if hit_area <= 0:
-            return None
+        normalized_bbox, hit_area = normalized
         candidates: list[tuple[float, dict[str, Any]]] = []
         overlapping_sections = 0
         for section in sections:
@@ -311,6 +327,67 @@ def _select_threshold(cases: list[dict[str, Any]], scores: dict[str, float]) -> 
     return threshold, accuracy
 
 
+def _evaluation_cases(cases: list[dict[str, Any]], stage: str) -> list[dict[str, Any]]:
+    if stage == "all":
+        return cases
+    split = "dev" if stage == "dev" else "test"
+    selected = [case for case in cases if case["split"] == split]
+    if not selected:
+        raise ValueError(f"evaluation stage {stage!r} contains no cases")
+    return selected
+
+
+def _load_development_lock(
+    path: Path,
+    corpus_hash: str,
+) -> tuple[dict[str, dict[str, float]], dict[str, Any]]:
+    try:
+        report = _read_json(path)
+    except (OSError, ValueError, json.JSONDecodeError) as error:
+        raise ValueError("development evaluation lock is unavailable") from error
+    if (
+        report.get("status") != "dev_passed"
+        or report.get("stage") != "dev"
+        or report.get("evidence_status") != "VERIFIED_SYNTHETIC"
+        or report.get("corpus_hash") != corpus_hash
+    ):
+        raise ValueError("development evaluation lock is not a passed matching dev report")
+    metrics = report.get("metrics")
+    if not isinstance(metrics, dict):
+        raise ValueError("development evaluation lock has no metrics")
+    gates = metrics.get("gates")
+    if not isinstance(gates, dict) or not (
+        gates.get("generation_structure_failures_is_zero") is True
+        and gates.get("generation_request_failures_is_zero") is True
+        and gates.get("server_citation_id_validity_is_100_percent") is True
+    ):
+        raise ValueError("development generation gates are not passed")
+    threshold_block = metrics.get("refusal_threshold")
+    if not isinstance(threshold_block, dict) or threshold_block.get("selected_on") != "dev":
+        raise ValueError("development evaluation lock has no dev threshold")
+    by_variant = threshold_block.get("by_variant")
+    if not isinstance(by_variant, dict):
+        raise ValueError("development evaluation lock has invalid thresholds")
+    thresholds: dict[str, dict[str, float]] = {}
+    for variant in VARIANTS:
+        value = by_variant.get(variant.value)
+        if not isinstance(value, dict):
+            raise ValueError("development evaluation lock is missing a variant threshold")
+        threshold = value.get("value")
+        accuracy = value.get("development_accuracy")
+        if (
+            type(threshold) not in (int, float)
+            or not 0.0 <= float(threshold) <= 1.0
+            or type(accuracy) not in (int, float)
+        ):
+            raise ValueError("development evaluation lock has invalid threshold values")
+        thresholds[variant.value] = {
+            "value": float(threshold),
+            "development_accuracy": float(accuracy),
+        }
+    return thresholds, report
+
+
 def _split_metrics(
     cases: list[dict[str, Any]],
     predictions: list[dict[str, Any]],
@@ -344,9 +421,27 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     corpus_manifest = _read_json(
         REPOSITORY_ROOT / "datasets" / "generated" / "corpus_manifest.json"
     )
-    cases = load_jsonl(REPOSITORY_ROOT / "evaluation" / "frozen_cases.jsonl")
+    all_cases = load_jsonl(REPOSITORY_ROOT / "evaluation" / "frozen_cases.jsonl")
     facts = load_jsonl(REPOSITORY_ROOT / "datasets" / "generated" / "canonical_facts.jsonl")
     resolver = LocatorResolver(corpus_manifest)
+    stage = getattr(args, "stage", "all")
+    if stage not in {"all", "dev", "frozen"}:
+        raise ValueError(f"unsupported evaluation stage: {stage!r}")
+    cases = _evaluation_cases(all_cases, stage)
+    development_lock: dict[str, Any] | None = None
+    locked_thresholds: dict[str, dict[str, float]] | None = None
+    if stage == "frozen":
+        development_report = Path(
+            getattr(
+                args,
+                "development_report",
+                REPOSITORY_ROOT / "artifacts" / "evaluation" / "dev.json",
+            )
+        )
+        locked_thresholds, development_lock = _load_development_lock(
+            development_report,
+            corpus_hash,
+        )
 
     api_key = os.environ.get("DASHSCOPE_API_KEY", "")
     if args.provider == "dashscope" and not api_key:
@@ -367,6 +462,17 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             CVRAG_INDEX_NAME=f"cvrag-eval-{corpus_hash[:12]}",
             CVRAG_DATABASE_URL=f"sqlite:///{Path(database_directory) / 'evaluation.db'}",
         )
+        if development_lock is not None and locked_thresholds is not None:
+            locked_config = development_lock.get("runtime_config")
+            locked_hash = development_lock.get("config_hash")
+            expected_config = runtime_evaluation_config(
+                settings,
+                locked_thresholds[FINAL_VARIANT.value]["value"],
+            )
+            if locked_config != expected_config or locked_hash != runtime_config_hash(
+                expected_config
+            ):
+                raise ValueError("development evaluation lock runtime configuration drifted")
         provider = CachedProvider(build_provider(settings))
         cleanup.callback(provider.close)
         evaluation_evidence_status = (
@@ -545,16 +651,18 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
                 ],
             }
 
-        thresholds: dict[str, dict[str, float]] = {}
+        thresholds: dict[str, dict[str, float]] = locked_thresholds or {}
+        if not thresholds:
+            for variant in VARIANTS:
+                value, accuracy = _select_threshold(cases, score_by_variant[variant.value])
+                thresholds[variant.value] = {
+                    "value": value,
+                    "development_accuracy": accuracy,
+                }
         for variant in VARIANTS:
-            value, accuracy = _select_threshold(cases, score_by_variant[variant.value])
-            thresholds[variant.value] = {
-                "value": value,
-                "development_accuracy": accuracy,
-            }
             for prediction in raw_results[variant.value]:
-                prediction["refused"] = prediction["top_score"] < value
-                prediction["threshold"] = value
+                prediction["refused"] = prediction["top_score"] < thresholds[variant.value]["value"]
+                prediction["threshold"] = thresholds[variant.value]["value"]
         threshold = thresholds[FINAL_VARIANT.value]["value"]
         generation_latencies: list[float] = []
         final_by_case = {
@@ -582,6 +690,8 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
             except ProviderError as error:
                 prediction["outcome"] = "needs_review"
                 prediction["generation_error"] = error.code
+                prediction["generation_error_category"] = error.diagnostic_category
+                prediction["generation_retry_attempted"] = error.retry_attempted
                 continue
             finally:
                 generation_latencies.append((time.perf_counter() - generation_started) * 1000)
@@ -614,24 +724,39 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         server_citation_id_validity = variant_metrics[FINAL_VARIANT.value]["all"][
             "server_citation_id_validity"
         ]
-        final_test = variant_metrics[FINAL_VARIANT.value]["test"]
-        baseline_test = variant_metrics[RetrievalVariant.BM25.value]["test"]
+        metric_split = "dev" if stage == "dev" else "test"
+        final_test = variant_metrics[FINAL_VARIANT.value][metric_split]
+        baseline_test = variant_metrics[RetrievalVariant.BM25.value][metric_split]
         final_false_answer_rate = _false_answer_rate(
-            cases, raw_results[FINAL_VARIANT.value], "test"
+            cases, raw_results[FINAL_VARIANT.value], metric_split
         )
         baseline_false_answer_rate = _false_answer_rate(
-            cases, raw_results[RetrievalVariant.BM25.value], "test"
+            cases, raw_results[RetrievalVariant.BM25.value], metric_split
+        )
+        final_predictions = raw_results[FINAL_VARIANT.value]
+        generation_structure_failures = sum(
+            prediction.get("generation_error") == "generation_invalid_structure"
+            for prediction in final_predictions
+        )
+        generation_request_failures = sum(
+            prediction.get("outcome") == "needs_review" for prediction in final_predictions
         )
         gates = {
-            "recall_at_5_not_below_bm25": (
-                final_test["evidence_recall_at_5"] >= baseline_test["evidence_recall_at_5"]
-            ),
-            "ndcg_at_5_above_bm25": (final_test["ndcg_at_5"] > baseline_test["ndcg_at_5"]),
-            "unanswerable_false_answer_rate_not_worse": (
-                final_false_answer_rate <= baseline_false_answer_rate
-            ),
+            "generation_structure_failures_is_zero": generation_structure_failures == 0,
+            "generation_request_failures_is_zero": generation_request_failures == 0,
             "server_citation_id_validity_is_100_percent": (server_citation_id_validity == 1.0),
         }
+        if stage != "dev":
+            gates = {
+                "recall_at_5_not_below_bm25": (
+                    final_test["evidence_recall_at_5"] >= baseline_test["evidence_recall_at_5"]
+                ),
+                "ndcg_at_5_above_bm25": (final_test["ndcg_at_5"] > baseline_test["ndcg_at_5"]),
+                "unanswerable_false_answer_rate_not_worse": (
+                    final_false_answer_rate <= baseline_false_answer_rate
+                ),
+                **gates,
+            }
 
         badcases: list[dict[str, Any]] = []
         case_by_id = {case["case_id"]: case for case in cases}
@@ -653,6 +778,8 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
                         "category": "Citation",
                         "case_id": case["case_id"],
                         "reason": prediction.get("generation_error", "invalid_citation"),
+                        "diagnostic_category": prediction.get("generation_error_category"),
+                        "retry_attempted": prediction.get("generation_retry_attempted", False),
                     }
                 )
         hybrid_by_id = {
@@ -683,12 +810,16 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
                 )
 
         if evaluation_evidence_status == "VERIFIED_SYNTHETIC":
-            report_status = "passed" if all(gates.values()) else "failed"
+            if stage == "dev":
+                report_status = "dev_passed" if all(gates.values()) else "failed"
+            else:
+                report_status = "passed" if all(gates.values()) else "failed"
         else:
             report_status = "contract_only"
         runtime_config = runtime_evaluation_config(settings, threshold)
         report = {
             "status": report_status,
+            "stage": stage,
             "evidence_status": evaluation_evidence_status,
             "generated_at": datetime.now(UTC).isoformat(),
             "corpus_hash": corpus_hash,
@@ -706,6 +837,10 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
                     "by_variant": thresholds,
                 },
                 "server_citation_id_validity": server_citation_id_validity,
+                "generation_validation": {
+                    "structure_failures": generation_structure_failures,
+                    "request_failures": generation_request_failures,
+                },
                 "generation_latency_ms": {
                     "samples": len(generation_latencies),
                     "p50": sorted(generation_latencies)[len(generation_latencies) // 2]
@@ -752,6 +887,7 @@ def main() -> None:
         description="Run the frozen CVRAG ingestion/retrieval/citation evaluation."
     )
     parser.add_argument("--provider", choices=("dashscope", "fake"), default="dashscope")
+    parser.add_argument("--stage", choices=("all", "dev", "frozen"), default="all")
     parser.add_argument("--model-dir", type=Path, default=REPOSITORY_ROOT / "models" / "deepdoc")
     parser.add_argument("--elasticsearch-url", default="http://localhost:9200")
     parser.add_argument(
@@ -764,6 +900,12 @@ def main() -> None:
         type=Path,
         default=REPOSITORY_ROOT / "artifacts" / "evaluation" / "predictions",
     )
+    parser.add_argument(
+        "--development-report",
+        type=Path,
+        default=REPOSITORY_ROOT / "artifacts" / "evaluation" / "dev.json",
+        help="Passed dev report required when --stage frozen.",
+    )
     args = parser.parse_args()
     report = run(args)
     args.output.parent.mkdir(parents=True, exist_ok=True)
@@ -773,7 +915,7 @@ def main() -> None:
         newline="\n",
     )
     print(json.dumps(report, ensure_ascii=False, indent=2))
-    raise SystemExit(0 if report["status"] in {"passed", "contract_only"} else 1)
+    raise SystemExit(0 if report["status"] in {"passed", "contract_only", "dev_passed"} else 1)
 
 
 if __name__ == "__main__":

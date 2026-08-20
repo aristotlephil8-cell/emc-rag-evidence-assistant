@@ -47,6 +47,11 @@ def build_chunks(
                 page_number=section.page_number,
                 section_path=list(section.section_path),
                 bbox=section.bbox,
+                table_index=(
+                    section.metadata.get("table_index")
+                    if isinstance(section.metadata.get("table_index"), int)
+                    else None
+                ),
                 table_row=section.table_row,
                 parser_locator=dict(section.metadata),
                 chunk_id=chunk_id,

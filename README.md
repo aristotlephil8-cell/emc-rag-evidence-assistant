@@ -1,19 +1,55 @@
-# CVRAG
+# CVRAG · EMC Evidence Assistant
 
 面向电磁兼容（EMC）试验知识的可复现、证据优先 RAG 展示项目。CVRAG 将多格式文档解析、混合检索、重排、结构化引用校验与拒答闭环放在一个可公开审查的 Demo 中。
 
 An evidence-first, reproducible RAG demo for electromagnetic-compatibility (EMC) knowledge. CVRAG combines multi-format ingestion, hybrid retrieval, reranking, citation validation, and fail-closed answering in a public-reviewable application.
 
-> **Evidence status / 证据状态：`NOT_RUN / NOT_VERIFIED`**<br>
-> 当前仓库没有 `artifacts/evaluation/latest.json`，因此没有可发布的在线模型效果指标。fake Provider 仅用于接口、UI 与 CI 契约验证，不构成 Embedding、Rerank 或答案质量证据。
+> **Public evidence status / 公开证据状态：`VERIFIED_SYNTHETIC / PASSED`**<br>
+> 当前提交包含可复现的公开合成评测报告。它只证明 committed fixtures 上的当次结果，不证明真实标准覆盖、实验室认可、历史职责、用户试用或生产效果。
 
-[中文](#中文) · [English](#english) · [Architecture](docs/ARCHITECTURE.md) · [Evaluation](docs/EVALUATION.md) · [Security](docs/SECURITY.md)
+[![CI](https://github.com/aristotlephil8-cell/emc-rag-evidence-assistant/actions/workflows/ci.yml/badge.svg)](https://github.com/aristotlephil8-cell/emc-rag-evidence-assistant/actions/workflows/ci.yml)
+
+[中文](#中文) · [English](#english) · [面试审阅指南](docs/PORTFOLIO.md) · [Architecture](docs/ARCHITECTURE.md) · [Evaluation](docs/EVALUATION.md) · [Security](docs/SECURITY.md)
 
 ## 中文
 
 ### 项目定位
 
-CVRAG 是秋招作品集用途的公开工程 Demo，不是生产系统、实验室认可工具或真实标准数据库。仓库内只包含虚构的合成 EMC 教学资料；不包含个人简历、客户资料、内部试验记录、真实标准全文、凭据或本地参考项目痕迹。
+CVRAG 是秋招作品集用途的公开工程 Demo，不是生产系统、实验室认可工具或真实标准数据库。冻结评测资料是虚构的合成 EMC 教学资料；另有一组独立的公开真实参考 PDF（见 `datasets/public_real/`），并附来源、许可边界与哈希。仓库不包含个人简历、客户资料、内部试验记录、付费标准全文、凭据或本地参考项目痕迹。
+
+### 90 秒审阅路径
+
+如果你是招聘方或面试官，建议按下面顺序阅读：
+
+1. 先看截图和下方五项能力，确认项目解决的问题与产品形态。
+2. 再看公开合成评测卡片，区分“本仓库当次可复现实验”和“简历中的历史项目陈述”。
+3. 最后沿着 [面试审阅指南](docs/PORTFOLIO.md) 进入入口代码、架构、Badcase 和评测协议。
+
+| 本仓库公开合成评测（`VERIFIED_SYNTHETIC`） | 当次结果 |
+| --- | ---: |
+| Parser 成功率（16 / 16 逻辑文档） | 100% |
+| Routed Hybrid RRF + Rerank：Evidence Recall@5 / MRR@10 / nDCG@5 | 100% / 1.000 / 1.000 |
+| Citation Precision / Recall / 服务端 Citation ID 有效性 | 94.4% / 100% / 100% |
+| 拒答准确率 | 93.8% |
+| P95 检索 / 生成延迟 | 261 ms / 2.65 s |
+
+指标来自 [`artifacts/evaluation/latest.json`](artifacts/evaluation/latest.json) 的一次固定配置、固定公开合成语料运行。请勿将其外推到真实 EMC 标准、私有资料或生产流量。
+
+<details>
+<summary>简历历史项目上下文（不属于本仓库的可复现评测）</summary>
+
+以下是简历中 `2023.05–2024.05` emcRAG 历史项目的陈述，保留在此只用于帮助面试官理解履历与公开 Demo 的关系；原始文档、评测集和运行日志未随仓库发布，因此**不能**作为本仓库效果证据。
+
+| 简历陈述范围 | 简历报告指标 |
+| --- | --- |
+| 160 份分层抽样文档 | 解析验收通过率 82.5% → 95.6% |
+| 120 个固定问题、164 条必需证据 | Evidence Recall@5 68.3% → 84.1%；MRR 0.56 → 0.74 |
+| 80 个固定问题、前后各 250 组原子主张-引用关系 | 引用准确率 92.4%；无证据主张占比 16.8% → 5.6% |
+| 12 人连续 4 周、3,200 次请求 | P95 TTFT 1.85 s；端到端成功率 99.2% |
+
+公开仓库展示的是同类“证据优先 RAG”工程实现与独立公开合成评测，不是历史系统的源代码归档或复现证明。
+
+</details>
 
 ![CVRAG fake-provider workspace](docs/assets/fake-workspace.png)
 
@@ -98,7 +134,7 @@ DashScope 展示模式会读取已通过评测报告中的 `runtime_config + con
 | `GET` | `/api/v1/documents` | 文档哈希、解析/切块/索引版本、状态与块数量 |
 | `POST` | `/api/v1/retrieval/search` | `{"query":"...","top_k":5,"variant":"routed_hybrid_rrf_rerank"}` |
 | `POST` | `/api/v1/chat/stream` | `{"query":"..."}`；SSE 事件仅为 `sources`、`token`、`done`、`error` |
-| `GET` | `/api/v1/evaluation/latest` | 没有有效报告时返回 `status=not_run`、`evidence_status=NOT_VERIFIED` |
+| `GET` | `/api/v1/evaluation/latest` | 返回已提交的评测报告；没有有效报告时才返回 `status=not_run`、`evidence_status=NOT_VERIFIED` |
 
 来源定位统一包含：`document_id / filename / page_number / section_path / bbox / table_row / chunk_id`。检索接口可切换五种方案：`bm25`、`vector`、`hybrid_rrf`、`hybrid_rrf_rerank`、`routed_hybrid_rrf_rerank`。
 
@@ -136,11 +172,11 @@ conda run --no-capture-output -n cvrag python -m pip install -e "backend[dev]"
 | 代码与公开合成 fixtures | `IMPLEMENTED` | 可审查架构、契约和冻结哈希 |
 | fake Provider | `IMPLEMENTED_FAKE_VERIFIED` | 仅接口/流程占位；不是语义检索或生成质量证据 |
 | 数据集规模与 split | `VERIFIED_SYNTHETIC_CONTRACT` | 仅说明 committed fixtures 的组成 |
-| `artifacts/evaluation/latest.json` | `NOT_RUN / NOT_VERIFIED` | 文件当前不存在；不得发布 Recall、nDCG、延迟或提升比例 |
-| DashScope 真实在线评测 | `NOT_RUN / NOT_VERIFIED` | 未生成可复核报告 |
+| `artifacts/evaluation/latest.json` | `VERIFIED_SYNTHETIC / PASSED` | 固定公开合成 fixtures 的 16 文档 / 40 问题当次结果；详见报告 |
+| DashScope 真实在线评测 | `VERIFIED_SYNTHETIC / PASSED` | 只证明当前公开合成协议与固定配置，不代表真实资料或生产效果 |
 | DeepDOC 真实资产与扫描/表格烟测 | `VERIFIED_LOCAL` | 固定五项资产校验、公开合成扫描 PDF 与表格 PDF 均通过；不是生产隔离证据 |
 | fake Provider Docker Compose | `VERIFIED_LOCAL` | 一键启动后 Elasticsearch、后端和前端健康；仅流程/接口验证 |
-| GitHub Actions | `NOT_RUN / NOT_VERIFIED` | 工作流已配置，尚未推送至远端运行 |
+| GitHub Actions | `VERIFIED_REMOTE` | `main` 的最近一次 CI 通过；以 Actions 页面为准 |
 | UI 截图 | `PUBLISHED_FAKE_DEMO_SCREENSHOT` | 本机 fake Provider 流程展示；不包含效果指标 |
 
 即使未来报告标记为 `VERIFIED_SYNTHETIC`，它也只证明公开合成 fixtures 上的当次结果，不证明真实标准覆盖、实验室认可、生产效果、历史职责、用户试用或生产请求量。
@@ -155,7 +191,7 @@ conda run --no-capture-output -n cvrag python -m pip install -e "backend[dev]"
 
 CVRAG is a public portfolio demo, not a production service, accredited laboratory tool, or repository of real standards. It contains only fictional synthetic EMC teaching fixtures—no resume, customer material, internal test record, credential, full standard text, or local reference-project trace.
 
-The implemented flow supports PDF/DOCX/UTF-8 TXT ingestion; text-first PDF parsing with whole-document DeepDOC fallback for scans, tables, and complex layouts; SHA-256 document identity; stable source locators; SQLite lifecycle metadata; Elasticsearch BM25 and 1024-dimensional kNN retrieval; weighted RRF; Qwen3 reranking; structured claims; server-side citation validation; and fail-closed refusal/review states.
+The implemented flow supports PDF/DOCX/UTF-8 TXT ingestion; text-first PDF parsing with whole-document DeepDOC fallback for scans, tables, and complex layouts; SHA-256 document identity; stable source locators; SQLite lifecycle metadata; Elasticsearch BM25 and 1024-dimensional kNN retrieval; weighted RRF; Qwen3 reranking; structured claims; server-side citation validation; and fail-closed refusal/review states. Frozen evaluation fixtures are synthetic; separately curated public-real references live in `datasets/public_real/` with provenance and rights boundaries.
 
 Exact-like queries use `0.7 lexical / 0.3 vector`; semantic queries use `0.3 / 0.7`. BM25 Top 50 and kNN Top 50 are fused with RRF `k=60`; Top 30 are offered to the reranker and Top 5 become evidence. See [Architecture](docs/ARCHITECTURE.md).
 
@@ -189,9 +225,11 @@ Validate the contract without producing online metrics:
 
 The five variants are BM25, Vector, Hybrid RRF, Hybrid RRF + Rerank, and Routed Hybrid RRF + Rerank. Metric definitions, threshold discipline, gates, and Badcase categories are documented in [Evaluation](docs/EVALUATION.md).
 
-### Evidence boundary
+### Reviewer path and evidence boundary
 
-`artifacts/evaluation/latest.json` is absent in this snapshot. Therefore the public result status is **`NOT_RUN / NOT_VERIFIED`**: no Recall, nDCG, latency, citation, refusal, or improvement number is claimed, and no result screenshot is published. A later `VERIFIED_SYNTHETIC` artifact would apply only to the committed public fixtures; it would not establish real-standard coverage, accreditation, production performance, historical responsibility, user trials, or production traffic.
+Start with the workspace screenshot, then the [reviewer guide](docs/PORTFOLIO.md), the [architecture](docs/ARCHITECTURE.md), and the committed [`latest.json`](artifacts/evaluation/latest.json). The current public result is **`VERIFIED_SYNTHETIC / PASSED`** on the committed synthetic fixtures: Parser success is 100%; the routed final variant has Evidence Recall@5 / MRR@10 / nDCG@5 of 100% / 1.000 / 1.000; and server-side citation-ID validity is 100%.
+
+These numbers do not establish real-standard coverage, accreditation, production performance, historical responsibility, user trials, or production traffic. Resume-reported historical emcRAG metrics are deliberately separated in the Chinese reviewer section and are not reproduced by this repository.
 
 ### License
 

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import importlib.util
 import json
 from pathlib import Path
@@ -7,7 +8,10 @@ from types import SimpleNamespace
 
 import pytest
 
+from app.chunking import build_chunks
 from app.ingestion import ParserService
+from app.ingestion.deepdoc import parse_deepdoc_pdf
+from app.ingestion.pdf_plain import parse_plain_pdf
 from app.models import (
     RetrievalResponse,
     RetrievalVariant,
@@ -15,6 +19,7 @@ from app.models import (
     SearchHit,
     SourceLocator,
 )
+from app.search import Candidate
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[2]
 RUNNER_PATH = REPOSITORY_ROOT / "backend" / "scripts" / "run_evaluation.py"
@@ -50,6 +55,7 @@ def _hit(
         filename=filename,
         page_number=section["page_number"],
         bbox=bbox,
+        table_index=1 if region.get("kind") == "table_row" else None,
         table_row=region.get("table_row"),
         parser_locator=parser_locator,
         chunk_id=chunk_id,
@@ -117,6 +123,37 @@ def test_primary_locator_ambiguity_fails_closed() -> None:
         resolver.evidence_ids(hit)
 
 
+def test_table_locator_requires_index_and_compact_row_bbox() -> None:
+    manifest = json.loads(
+        (REPOSITORY_ROOT / "datasets/generated/corpus_manifest.json").read_text(encoding="utf-8")
+    )
+    resolver = RUNNER.LocatorResolver(manifest)
+    document = next(
+        item for item in manifest["documents"] if item["filename"] == "synthetic_immunity_table.pdf"
+    )
+    section = document["sections"][0]
+    width, height = resolver.page_sizes[(document["filename"], 1)]
+    locator = SourceLocator(
+        document_id="runtime-content-hash",
+        filename=document["filename"],
+        page_number=1,
+        bbox=(0.0, 0.0, width, height),
+        table_index=1,
+        table_row=section["region"]["table_row"],
+        chunk_id="wide-table-row",
+    )
+    hit = SearchHit(
+        chunk_id="wide-table-row",
+        text="wide-table-row",
+        source=locator,
+        rank=1,
+        score=1.0,
+        scores=ScoreTrace(),
+    )
+
+    assert resolver.evidence_ids(hit) == ["chunk:wide-table-row"]
+
+
 def test_real_plain_parsers_cover_every_non_deepdoc_frozen_evidence() -> None:
     manifest = json.loads(
         (REPOSITORY_ROOT / "datasets/generated/corpus_manifest.json").read_text(encoding="utf-8")
@@ -169,6 +206,60 @@ def test_real_plain_parsers_cover_every_non_deepdoc_frozen_evidence() -> None:
 
     assert len(expected) == 24
     assert resolved == expected
+
+
+@pytest.mark.deepdoc
+def test_full_16_document_runtime_locator_audit() -> None:
+    model_dir = REPOSITORY_ROOT / "models" / "deepdoc"
+    if not model_dir.is_dir():
+        pytest.skip("DeepDOC assets are unavailable")
+    manifest = json.loads(
+        (REPOSITORY_ROOT / "datasets/generated/corpus_manifest.json").read_text(encoding="utf-8")
+    )
+    facts = [
+        json.loads(line)
+        for line in (REPOSITORY_ROOT / "datasets/generated/canonical_facts.jsonl")
+        .read_text(encoding="utf-8")
+        .splitlines()
+    ]
+    resolver = RUNNER.LocatorResolver(manifest)
+    candidates: list[Candidate] = []
+
+    for document in manifest["documents"]:
+        artifact = REPOSITORY_ROOT / document["artifact"]["path"]
+        content = artifact.read_bytes()
+        if artifact.suffix.lower() == ".pdf":
+            plain = parse_plain_pdf(content)
+            sections = (
+                parse_deepdoc_pdf(document["filename"], content, model_dir).sections
+                if plain.requires_deepdoc
+                else plain.sections
+            )
+        else:
+            sections = ParserService.parse(document["filename"], content, model_dir).sections
+        document_id = "doc_" + hashlib.sha256(content).hexdigest()[:24]
+        candidates.extend(
+            Candidate(chunk_id=chunk.chunk_id, text=chunk.text, source=chunk.source, score=0.0)
+            for chunk in build_chunks(document_id, document["filename"], sections)
+        )
+
+    ledger = RUNNER._runtime_locator_ledger(candidates, resolver, facts)
+    table_candidates = [
+        candidate
+        for candidate in candidates
+        if candidate.source.table_row is not None
+    ]
+
+    assert len(candidates) > 0
+    assert ledger["mapped_evidence"] == 40
+    assert ledger["missing_evidence"] == []
+    assert all(
+        ledger["evidence_chunk_cardinality"][f"syn-ev-{evidence_id:04d}"] == 1
+        for evidence_id in (*range(1, 9), *range(17, 25))
+    )
+    assert table_candidates
+    assert all(candidate.source.table_index == 1 for candidate in table_candidates)
+    assert len({candidate.source.bbox for candidate in table_candidates}) > 4
 
 
 def test_rerank_degradation_cannot_emit_verified_synthetic(monkeypatch, tmp_path) -> None:

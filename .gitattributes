@@ -1,3 +1,11 @@
 *.pdf binary
 *.docx binary
 *.png binary
+
+# Hash-frozen evaluation inputs must retain their committed LF bytes on every platform.
+datasets/generated/canonical_facts.jsonl text eol=lf
+datasets/generated/corpus_manifest.json text eol=lf
+datasets/generated/documents/*.txt text eol=lf
+datasets/scripts/generate_synthetic_corpus.py text eol=lf
+evaluation/frozen_cases.jsonl text eol=lf
+evaluation/freeze_manifest.json text eol=lf

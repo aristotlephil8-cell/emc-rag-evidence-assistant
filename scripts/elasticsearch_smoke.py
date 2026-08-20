@@ -32,6 +32,8 @@ def _chunk(chunk_id: str, text: str, embedding: list[float]) -> Chunk:
             page_number=1,
             section_path=["CI smoke"],
             bbox=(0.0, 0.0, 100.0, 20.0),
+            table_index=1,
+            table_row=1,
             chunk_id=chunk_id,
         ),
         embedding=embedding,
@@ -80,6 +82,12 @@ def main() -> None:
             raise AssertionError(
                 "document replacement produced an incomplete chunk set"
             )
+        stored = {candidate.chunk_id: candidate for candidate in index.all_candidates()}
+        if (
+            stored[first.chunk_id].source.table_index != 1
+            or stored[first.chunk_id].source.table_row != 1
+        ):
+            raise AssertionError("table locator fields did not survive Elasticsearch round-trip")
 
         invalid = _chunk("invalid-dimension", "must not become visible", [1.0])
         try:

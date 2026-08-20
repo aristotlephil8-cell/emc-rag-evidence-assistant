@@ -20,6 +20,7 @@ dist/
 # Runtime data and model assets
 data/runtime/
 data/uploads/
+/datasets/private_local/
 models/
 *.db
 *.sqlite3
