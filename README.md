@@ -1,102 +1,142 @@
 # EMC_RAG · EMC Evidence Assistant
 
-面向电磁兼容（EMC）试验知识的可复现、证据优先 RAG 展示项目。EMC_RAG 将多格式文档解析、混合检索、重排、结构化引用校验与拒答闭环放在一个可公开审查的 Demo 中。
+面向电磁兼容（EMC）试验知识的证据优先 RAG 项目，支持复杂文档解析、混合检索、Rerank、证据引用和证据不足拒答。
 
-An evidence-first, reproducible RAG demo for electromagnetic-compatibility (EMC) knowledge. EMC_RAG combines multi-format ingestion, hybrid retrieval, reranking, citation validation, and fail-closed answering in a public-reviewable application.
-
-> **Public evidence status / 公开证据状态：`VERIFIED_SYNTHETIC / PASSED`**<br>
-> 当前提交包含可复现的公开合成评测报告。它只证明 committed fixtures 上的当次结果，不证明真实标准覆盖、实验室认可、历史职责、用户试用或生产效果。
+An evidence-first RAG project for electromagnetic-compatibility (EMC) test knowledge. It supports complex document parsing, hybrid retrieval, reranking, source citation, and evidence-insufficient refusal.
 
 [![CI](https://github.com/aristotlephil8-cell/emc-rag-evidence-assistant/actions/workflows/ci.yml/badge.svg)](https://github.com/aristotlephil8-cell/emc-rag-evidence-assistant/actions/workflows/ci.yml)
 
-[中文](#中文) · [English](#english) · [面试审阅指南](docs/PORTFOLIO.md) · [Architecture](docs/ARCHITECTURE.md) · [Evaluation](docs/EVALUATION.md) · [Badcases](docs/BADCASES.md) · [Security](docs/SECURITY.md)
+[中文](#中文) · [English](#english) · [项目说明](docs/PORTFOLIO.md) · [Architecture](docs/ARCHITECTURE.md) · [Evaluation](docs/EVALUATION.md) · [Badcases](docs/BADCASES.md) · [Security](docs/SECURITY.md)
 
 ## 中文
 
-### 项目定位
+### 项目背景
 
-EMC_RAG 是简历项目中可公开展示的工程与验证部分，不是生产系统、实验室认可工具或真实标准数据库。冻结评测资料是虚构的合成 EMC 教学资料；另有一组独立的公开真实参考 PDF（见 `datasets/public_real/`），并附来源、许可边界与哈希。仓库不包含个人简历、客户资料、内部试验记录、付费标准全文、凭据或本地参考项目痕迹。
+电磁兼容测试资料分散、格式复杂且持续更新，用户既要查标准编号和设备参数，也要根据测试现象寻找相似案例。普通大模型无法保证知识时效和原文依据，关键词搜索又难以理解语义问题，因此项目采用 RAG，将专业资料独立管理，先检索相关证据，再生成可追溯的回答。
 
-### 个人贡献与公开边界
+### 项目目标与设计主线
 
-我在 EMC_RAG 项目中担任核心开发。本仓库展示以下可公开的职责、工程实现与验证证据：
+项目目标是帮助工程人员从分散、复杂、持续更新的测试资料中，快速找到适用的标准依据和可参考的整改案例，形成能够回到原文复核的辅助分析结果。
 
-| 个人贡献 | 公开可审查入口 |
-| --- | --- |
-| 文档解析入库：OCR、结构感知切分、元数据管理、幂等写入与索引版本管理 | [`backend/app/ingestion/`](backend/app/ingestion/)、[`backend/app/services.py`](backend/app/services.py) |
-| 混合检索与精排：BM25、向量检索、RRF、精确/语义查询分流与 Reranker | [`backend/app/search.py`](backend/app/search.py) |
-| 引用校验与拒答：来源/页码/条款定位、证据不足拒答和人工复核入口 | [`backend/app/providers.py`](backend/app/providers.py)、[`backend/app/services.py`](backend/app/services.py) |
-| 分层评测与回归：解析、检索、精排、生成和引用链路的冻结评测与回归测试 | [`evaluation/`](evaluation/)、[`backend/tests/`](backend/tests/) |
-
-公开边界：仓库仅保留可公开的合成资料、代码、测试、来源说明和脱敏报告；历史项目的内部文档、原始评测集与试用日志不发布。因此，仓库内的公开合成结果与简历中的历史结果分别陈述、互不替代。
-
-### 90 秒审阅路径
-
-如果你是招聘方或面试官，建议按下面顺序阅读：
-
-1. 先看截图和下方五项能力，确认项目解决的问题与产品形态。
-2. 再看公开合成评测卡片，区分“仓库当次可复现实验”和“EMC_RAG 项目历史结果”。
-3. 最后沿着 [面试审阅指南](docs/PORTFOLIO.md) 进入入口代码、架构、[Badcase](docs/BADCASES.md) 和评测协议。
-
-| 本仓库公开合成评测（`VERIFIED_SYNTHETIC`） | 当次结果 |
-| --- | ---: |
-| Parser 成功率（16 / 16 逻辑文档） | 100% |
-| Routed Hybrid RRF + Rerank：Evidence Recall@5 / MRR@10 / nDCG@5 | 100% / 1.000 / 1.000 |
-| Citation Precision / Recall / 服务端 Citation ID 有效性 | 94.4% / 100% / 100% |
-| 拒答准确率 | 93.8% |
-| P95 检索 / 生成延迟 | 261 ms / 2.65 s |
-
-指标来自 [`artifacts/evaluation/latest.json`](artifacts/evaluation/latest.json) 的一次固定配置、固定公开合成语料运行。请勿将其外推到真实 EMC 标准、私有资料或生产流量。
-
-<details>
-<summary>EMC_RAG 项目历史结果（不属于本仓库的可复现评测）</summary>
-
-以下是简历中 `2023.05–2024.05` EMC_RAG 项目的历史结果，保留在此只用于帮助面试官理解履历与公开展示部分的关系；原始文档、评测集和运行日志未随仓库发布，因此**不能**作为本仓库效果证据。
-
-| 简历陈述范围 | 简历报告指标 |
-| --- | --- |
-| 160 份分层抽样文档 | 解析验收通过率 82.5% → 95.6% |
-| 120 个固定问题、164 条必需证据 | Evidence Recall@5 68.3% → 84.1%；MRR 0.56 → 0.74 |
-| 80 个固定问题、前后各 250 组原子主张-引用关系 | 引用准确率 92.4%；无证据主张占比 16.8% → 5.6% |
-| 12 人连续 4 周、3,200 次请求 | P95 TTFT 1.85 s；端到端成功率 99.2% |
-
-公开仓库展示的是 EMC_RAG 项目可公开的“证据优先 RAG”工程实现与独立公开合成评测，不是完整历史系统的源代码归档，也不替代历史结果的原始证据。
-
-</details>
-
-![EMC_RAG fake-provider workspace](docs/assets/fake-workspace.png)
-
-上图来自本机 fake Provider 的实际工作区：展示文档状态、上传边界和问答界面；不展示、也不证明在线模型效果或评测指标。
-
-核心能力：
-
-- PDF、DOCX、UTF-8 TXT 入库；上传上限 20 MiB，PDF 上限 50 页。
-- 文本 PDF 优先直接提取；扫描件、表格或复杂版面整份回退到 DeepDOC OCR、版面与表格结构路径。
-- SHA-256 文档身份、稳定 `chunk_id`、结构感知切块、SQLite 版本/状态记录和幂等重入。
-- Elasticsearch 8.11.3 的 BM25 Top 50 与 1024 维 kNN Top 50，经加权 RRF（`k=60`）融合。
-- 标准号、条款号、型号、数值单位型查询使用 `0.7 lexical / 0.3 vector`；一般语义查询使用 `0.3 / 0.7`。
-- 候选 Top 30 进入 Qwen3 Rerank，最终返回 Top 5；重排失败会显式降级，问答链路 fail closed。
-- 生成模型先返回 `claims + citation_ids`；服务端逐条校验引用。证据不足返回 `insufficient_evidence`，引用、结构或检索异常返回 `needs_review`。
-- React 展示文档状态、检索分数轨迹、来源定位、评测方案与 [Badcase](docs/BADCASES.md)。
-
-详细数据流、索引生命周期和故障边界见 [架构说明](docs/ARCHITECTURE.md)。
-
-### 架构概览
+在系统实现上，本项目的 RAG 链路分为离线知识库构建和在线问答两个阶段，包含文档入库、检索排序、证据约束回答三个核心模块：
 
 ```mermaid
 flowchart LR
-    UI[React / Nginx] --> API[FastAPI]
-    API --> ING[PDF / DOCX / TXT ingestion]
-    ING --> DD[Text-first PDF or DeepDOC]
-    DD --> CH[Structured chunks + locators]
-    CH --> DS[(SQLite metadata)]
-    CH --> EMB[Embedding provider]
-    EMB --> ES[(Elasticsearch alias)]
-    API --> RET[BM25 + kNN + routed RRF]
-    RET --> RR[Qwen3 Rerank]
-    RR --> GEN[Structured claims]
-    GEN --> VAL[Citation validator]
-    VAL --> UI
+    subgraph S1[阶段一：离线知识库构建]
+        M1[模块一：文档解析与入库<br/>格式路由 · OCR · 结构化切分 · 来源定位]
+        IDX[(知识库索引)]
+        M1 --> IDX
+    end
+
+    subgraph S2[阶段二：在线问答]
+        M2[模块二：混合检索与排序<br/>BM25 · 向量检索 · RRF · Rerank]
+        M3[模块三：证据约束回答<br/>证据组装 · 生成 · 引用校验 · 拒答/人工确认]
+        M2 --> M3
+    end
+
+    DOC[标准、手册、报告、整改案例] --> M1
+    IDX --> M2
+    Q[用户问题] --> M2
+    M3 --> OUT[带来源的回答或人工复核]
+
+    classDef input fill:#E8F1FF,stroke:#3B82F6,color:#123B72,stroke-width:1.5px;
+    classDef module fill:#F3F4F6,stroke:#64748B,color:#1E293B,stroke-width:1px;
+    classDef evidence fill:#ECFDF5,stroke:#10B981,color:#065F46,stroke-width:1.5px;
+    class DOC,Q input;
+    class M1,M2,M3 module;
+    class IDX,OUT evidence;
+```
+
+方案落地后，开发过程中逐渐暴露出四类问题：
+
+1. **资料入库：** 复杂格式、扫描内容和表格信息不能只提取文字，还要通过 parser routing、OCR 和 structure-aware chunking 保留结构与 `SourceLocator`；
+2. **检索：** 既要找得到编号、型号等精确信息，也要理解用户对现象和问题的自然语言描述，因此需要结合 BM25、vector retrieval、RRF 和 Reranker；
+3. **回答控制：** 找到相关资料后，还要通过 structured claims、`citation_ids` 和 citation validation 避免模型扩大原文含义；
+4. **评测：** 每次改动都要通过固定数据集、分层 metrics 和 Badcase regression 判断问题究竟被解决，还是只是换了一种表现。
+
+因此，RAG 主链路由资料入库、检索排序和回答控制三个核心模块组成，评测与 Badcase 回归作为贯穿全流程的验证闭环。
+
+### 关键问题与优化点
+
+| 遇到的问题 | 为什么会出现 | 对应优化 |
+|---|---|---|
+| 文档内容无法完整进入系统 | 业务资料中既有普通 PDF、Word、表格，也有扫描件和复杂排版；直接提取可能得到空内容或丢失结构 | 按文件类型选择解析路径：文本优先直接提取，复杂资料再使用 OCR 和版面/表格解析；按章节、段落和表格边界切分，并保留页码和来源位置 |
+| 同一资料重复进入，旧版本仍被检索 | 资料会被重复上传或更新，基础入库流程难以区分同一个文件和不同版本 | 使用文件哈希识别重复内容，用稳定 `chunk_id`、业务库状态和版本记录支持幂等写入、失败重试和索引重建 |
+| 有些问题查不到，或者查到的内容不准确 | 基础向量检索能理解大致意思，但容易漏掉编号、型号和精确数值；只用关键词又难以理解自然语言描述 | 同时使用 BM25 和向量检索，再通过 RRF 融合；根据精确查询与语义查询进行查询路由和权重调整，兼顾两类匹配方式 |
+| 相关内容找到了，却没有排在前面 | 多路召回会得到一批相似内容，真正有用的证据可能被排在后面 | 先用较快的检索方式扩大候选范围，再用 Reranker 对较小候选集重新排序；重排失败时显式降级，不隐藏实际执行路径 |
+| 模型引用了资料，却没有真正支持结论 | 只在 Prompt 中要求“请引用”仍可能出现引用错误、扩大原文含义或证据不足时继续回答 | 让模型返回结构化 `claims + citation_ids`，由服务端逐条校验；证据不足时拒答，引用或检索异常进入人工复核状态 |
+| 优化后无法判断是否真的变好 | 只看几个成功案例，无法区分是解析、召回、排序还是回答环节的问题 | 固定问题集和指标，保留 Badcase，分别验证解析、检索、排序、引用和拒答效果；评测细节见 [Evaluation](docs/EVALUATION.md) 和 [Badcases](docs/BADCASES.md) |
+
+详细数据流、索引生命周期和故障边界见 [架构说明](docs/ARCHITECTURE.md)。
+
+### 项目整体架构
+
+架构设计直接来源于业务需求：资料需要持续更新、版本切换和幂等重试，因此由 PostgreSQL 管理用户、文档、版本和任务等业务事实，Elasticsearch 保存可重建的倒排与向量索引，原始文件独立存储；复杂文档解析不能阻塞在线查询，因此将 ingestion pipeline 与 query pipeline 分开，Redis 负责进度、缓存和临时状态；回答必须能够复核，因此按 retrieval、evidence assembly、generation 和 citation validation 分层，并在高风险场景进入 human-in-the-loop。
+
+核心原则是：**让知识可更新、检索可重建、回答可追溯，高风险结论可由工程师接管。**
+
+```mermaid
+flowchart TB
+    U[产品研发 / 送试人员 / EMC工程师]
+    UI[React 前端<br/>资料管理 · 问答 · 引用查看 · 人工确认]
+    API[FastAPI 应用服务<br/>认证 · 权限 · 任务状态 · RAG流程编排]
+
+    subgraph OFF[资料入库链路]
+        direction LR
+        UP[上传标准、手册、报告和整改案例]
+        PARSE[格式路由<br/>原生解析 · OCR补偿 · 表格处理]
+        CHUNK[结构化切分<br/>章节 · 条款 · 页码 · 来源定位]
+        EMB[Embedding]
+        UP --> PARSE --> CHUNK --> EMB
+    end
+
+    subgraph ONLINE[在线问答链路]
+        direction LR
+        Q[用户问题]
+        NORM[查询规范化<br/>权限 / 版本 / 资料类型过滤]
+        RET[BM25 + 向量并行召回]
+        RRF[RRF融合与去重]
+        RERANK[Reranker精排]
+        EVIDENCE[结构化证据组装]
+        GEN[大模型生成候选回答]
+        CHECK[引用、充分性和风险校验]
+        RESULT{处理结果}
+        ANSWER[回答 + 页码/条款/案例引用]
+        REVIEW[澄清、拒答或人工确认]
+        Q --> NORM --> RET --> RRF --> RERANK --> EVIDENCE --> GEN --> CHECK --> RESULT
+        RESULT -->|证据充分| ANSWER
+        RESULT -->|证据不足 / 冲突 / 高风险| REVIEW
+    end
+
+    PG[(PostgreSQL<br/>用户 · 项目 · 文档台账<br/>版本 · 权限 · 任务状态)]
+    ES[(Elasticsearch<br/>BM25 · 向量索引<br/>可重建检索数据)]
+    REDIS[(Redis<br/>进度 · 缓存 · 临时解析数据)]
+    FILES[(文件存储<br/>原始文档)]
+
+    U --> UI --> API
+    API --> UP
+    API --> Q
+    API --> PG
+    API --> REDIS
+    UP --> FILES
+    CHUNK --> PG
+    EMB --> ES
+    NORM --> PG
+    RET --> ES
+    CHECK --> PG
+    ANSWER --> UI
+    REVIEW --> UI
+
+    classDef actor fill:#E8F1FF,stroke:#3B82F6,color:#123B72,stroke-width:1.5px;
+    classDef service fill:#F3F4F6,stroke:#64748B,color:#1E293B,stroke-width:1px;
+    classDef evidence fill:#ECFDF5,stroke:#10B981,color:#065F46,stroke-width:1.5px;
+    classDef review fill:#FFF7ED,stroke:#F97316,color:#9A3412,stroke-width:1.5px;
+    classDef store fill:#F5F3FF,stroke:#8B5CF6,color:#5B21B6,stroke-width:1.2px;
+    class U,UI actor;
+    class API,UP,PARSE,CHUNK,EMB,Q,NORM,RET,RRF,RERANK,EVIDENCE,GEN,CHECK service;
+    class RESULT,ANSWER evidence;
+    class REVIEW review;
+    class PG,ES,REDIS,FILES store;
 ```
 
 ### 快速启动
@@ -151,64 +191,46 @@ DashScope 展示模式会读取已通过评测报告中的 `runtime_config + con
 
 来源定位统一包含：`document_id / filename / page_number / section_path / bbox / table_row / chunk_id`。检索接口可切换五种方案：`bm25`、`vector`、`hybrid_rrf`、`hybrid_rrf_rerank`、`routed_hybrid_rrf_rerank`。
 
-### 合成数据与评测
-
-冻结数据集标记为 `VERIFIED_SYNTHETIC`：
-
-- 16 份逻辑文档：12 primary、4 distractor。
-- 6 PDF（2 扫描、2 表格、2 文本）、5 DOCX、5 TXT。
-- 40 个固定问题：32 answerable、8 unanswerable；24 dev、16 frozen test。
-- 40 条 required evidence；Gold 只认稳定的文档与 locator 身份，不用关键词相似度代替。
-
-校验数据契约：
-
-```powershell
-conda create -n emc_rag python=3.11 -y
-conda run --no-capture-output -n emc_rag python -m pip install -e "backend[dev]"
-.\scripts\evaluate.ps1 -ValidateOnly
-```
-
-在 Elasticsearch 已运行、DeepDOC 资产可下载且当前进程已注入 `DASHSCOPE_API_KEY` 后，才可运行在线合成评测：
-
-```powershell
-.\scripts\evaluate.ps1
-```
-
-评测比较五组方案，并输出 Parser 成功率、Hit@5、Evidence Recall@5、MRR@10、nDCG@5、Context Precision@5、引用 ID 有效率、Citation Precision/Recall、拒答准确率、无答案误答率、可回答问题误拒率与 P50/P95 延迟。拒答阈值只在 dev 网格选择，配置锁定后再看 frozen test。
-
-效果门禁为：最终方案 Recall@5 不低于 BM25、nDCG@5 高于 BM25、无答案误答率不劣于 BM25、服务端引用 ID 有效率为 100%。详细定义见 [评测协议](docs/EVALUATION.md)。
-
-### 当前证据状态
-
-| 项目 | 当前状态 | 可陈述边界 |
-| --- | --- | --- |
-| 代码与公开合成 fixtures | `IMPLEMENTED` | 可审查架构、契约和冻结哈希 |
-| fake Provider | `IMPLEMENTED_FAKE_VERIFIED` | 仅接口/流程占位；不是语义检索或生成质量证据 |
-| 数据集规模与 split | `VERIFIED_SYNTHETIC_CONTRACT` | 仅说明 committed fixtures 的组成 |
-| `artifacts/evaluation/latest.json` | `VERIFIED_SYNTHETIC / PASSED` | 固定公开合成 fixtures 的 16 文档 / 40 问题当次结果；详见报告 |
-| DashScope 真实在线评测 | `VERIFIED_SYNTHETIC / PASSED` | 只证明当前公开合成协议与固定配置，不代表真实资料或生产效果 |
-| DeepDOC 真实资产与扫描/表格烟测 | `VERIFIED_LOCAL` | 固定五项资产校验、公开合成扫描 PDF 与表格 PDF 均通过；不是生产隔离证据 |
-| fake Provider Docker Compose | `VERIFIED_LOCAL` | 一键启动后 Elasticsearch、后端和前端健康；仅流程/接口验证 |
-| GitHub Actions | `VERIFIED_REMOTE` | `main` 的最近一次 CI 通过；以 Actions 页面为准 |
-| UI 截图 | `PUBLISHED_FAKE_DEMO_SCREENSHOT` | 本机 fake Provider 流程展示；不包含效果指标 |
-
-即使未来报告标记为 `VERIFIED_SYNTHETIC`，它也只证明公开合成 fixtures 上的当次结果，不证明真实标准覆盖、实验室认可、生产效果、历史职责、用户试用或生产请求量。
-
 ### 第三方与许可
 
 项目代码以 Apache-2.0 发布。DeepDOC/RAGFlow 适配与五个模型资产的来源、固定 revision、SHA-256 校验和修改说明见 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md)。模型二进制由使用者下载并校验，不进入 Git。
 
 ## English
 
-### Scope
+### Background and goal
 
-EMC_RAG is the publicly shareable engineering and validation portion of the resume project. It is not a production service, accredited laboratory tool, or repository of real standards. It contains only fictional synthetic EMC teaching fixtures—no resume, customer material, internal test record, credential, full standard text, or local reference-project trace.
+EMC test documents are scattered, format-diverse, and continuously updated. Users need both exact information such as standard numbers and equipment parameters, and semantic search for similar test phenomena. A general-purpose language model cannot ensure current knowledge or source support, while keyword search cannot understand semantic descriptions. EMC_RAG therefore uses RAG to manage domain documents separately, retrieve relevant evidence first, and generate traceable answers.
 
-The implemented flow supports PDF/DOCX/UTF-8 TXT ingestion; text-first PDF parsing with whole-document DeepDOC fallback for scans, tables, and complex layouts; SHA-256 document identity; stable source locators; SQLite lifecycle metadata; Elasticsearch BM25 and 1024-dimensional kNN retrieval; weighted RRF; Qwen3 reranking; structured claims; server-side citation validation; and fail-closed refusal/review states. Frozen evaluation fixtures are synthetic; separately curated public-real references live in `datasets/public_real/` with provenance and rights boundaries.
+The goal is to help engineers find applicable standards and relevant remediation cases from complex test materials, and produce analysis that can be checked against the original sources.
 
-Exact-like queries use `0.7 lexical / 0.3 vector`; semantic queries use `0.3 / 0.7`. BM25 Top 50 and kNN Top 50 are fused with RRF `k=60`; Top 30 are offered to the reranker and Top 5 become evidence. See [Architecture](docs/ARCHITECTURE.md).
+### Problems and optimization path
 
-### Quickstart
+The project addresses four problems that emerge in this workflow:
+
+1. **Ingestion:** parser routing, OCR, and structure-aware chunking are required to preserve document structure and `SourceLocator` information.
+2. **Retrieval:** BM25, vector retrieval, RRF, and reranking are combined to cover both exact terms and natural-language descriptions.
+3. **Generation:** structured claims, `citation_ids`, and citation validation are used to keep conclusions tied to retrieved evidence.
+4. **Evaluation:** fixed datasets, layered metrics, and Badcase regression are used to verify whether a change actually solves the target problem.
+
+The resulting path is:
+
+```text
+Business problem
+→ Ingestion pipeline
+→ Retrieval pipeline
+→ Generation guardrails
+→ Evaluation regression
+```
+
+### Project architecture
+
+The project-level architecture consists of a React frontend, FastAPI orchestration service, PostgreSQL for business facts and document state, Elasticsearch for rebuildable retrieval indexes, Redis for progress and temporary data, and file storage for original documents. The main flow is shown in the Chinese section above; detailed data flow is documented in [Architecture](docs/ARCHITECTURE.md).
+
+### Local reproduction
+
+The commands below start the public local reproduction environment:
+
+#### Quickstart
 
 Prerequisites: Docker Engine/Desktop and Docker Compose v2. The first start downloads and verifies pinned DeepDOC assets; model binaries are excluded from Git.
 
@@ -222,27 +244,9 @@ Open <http://localhost:5173> for the UI and <http://localhost:8000/docs> for Ope
 .\scripts\stop.ps1
 ```
 
-The fake provider is deterministic contract scaffolding, not semantic retrieval, reranking, or answer-quality evidence.
+The fake provider is deterministic contract scaffolding for the local reproduction flow; it is not semantic retrieval, reranking, or answer-quality evidence.
 
 For DashScope mode, inject `DASHSCOPE_API_KEY` into the current process—never commit it—run `evaluate.ps1`, and only then run `start.ps1 -Provider dashscope`. Startup validates the passed report's runtime configuration hash and locked dev threshold; a missing, failed, or drifted report is rejected. This mode sends document chunks, queries, candidates, and selected evidence to remote model APIs. Review [Security](docs/SECURITY.md) before enabling it.
-
-### Frozen synthetic evaluation
-
-The `VERIFIED_SYNTHETIC` corpus contains 16 logical documents (12 primary and 4 distractors): 6 PDFs, 5 DOCX files, and 5 TXT files. The 40 cases comprise 32 answerable and 8 unanswerable questions, split into 24 development and 16 frozen-test cases with 40 exact required-evidence identities.
-
-Validate the contract without producing online metrics:
-
-```powershell
-.\scripts\evaluate.ps1 -ValidateOnly
-```
-
-The five variants are BM25, Vector, Hybrid RRF, Hybrid RRF + Rerank, and Routed Hybrid RRF + Rerank. Metric definitions, threshold discipline, gates, and Badcase categories are documented in [Evaluation](docs/EVALUATION.md).
-
-### Reviewer path and evidence boundary
-
-Start with the workspace screenshot, then the [reviewer guide](docs/PORTFOLIO.md), the [architecture](docs/ARCHITECTURE.md), and the committed [`latest.json`](artifacts/evaluation/latest.json). The current public result is **`VERIFIED_SYNTHETIC / PASSED`** on the committed synthetic fixtures: Parser success is 100%; the routed final variant has Evidence Recall@5 / MRR@10 / nDCG@5 of 100% / 1.000 / 1.000; and server-side citation-ID validity is 100%.
-
-These numbers do not establish real-standard coverage, accreditation, production performance, historical responsibility, user trials, or production traffic. Historical EMC_RAG project results are deliberately separated in the Chinese reviewer section and are not reproduced by this repository.
 
 ### License
 
