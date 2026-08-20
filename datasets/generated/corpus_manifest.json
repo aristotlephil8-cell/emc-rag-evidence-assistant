@@ -1,0 +1,1133 @@
+{
+  "schema_version": 1,
+  "corpus_version": "verified-synthetic-v2",
+  "dataset_label": "VERIFIED_SYNTHETIC",
+  "created_at": "2026-08-20T00:00:00Z",
+  "notice": "SYNTHETIC TRAINING FIXTURE - NOT A REAL STANDARD OR CERTIFICATION RECORD",
+  "counts": {
+    "logical_documents": 16,
+    "primary_documents": 12,
+    "distractor_documents": 4,
+    "pdf_documents": 6,
+    "pdf_scan": 2,
+    "pdf_table": 2,
+    "pdf_text": 2,
+    "docx_documents": 5,
+    "txt_documents": 5,
+    "canonical_facts": 40
+  },
+  "canonical_facts": {
+    "path": "datasets/generated/canonical_facts.jsonl",
+    "sha256": "27349f5c5379a3ca62dff9f272530e34212d378a1b3d55ace75aad2601865e95",
+    "size_bytes": 17760
+  },
+  "documents": [
+    {
+      "document_id": "syn-pdf-text-01",
+      "filename": "synthetic_conducted_prescan.pdf",
+      "format": "pdf",
+      "pdf_mode": "text",
+      "role": "primary",
+      "title": "SYN-EMC-LAB-101 Conducted Pre-scan Teaching Card",
+      "sections": [
+        {
+          "section_id": "syn-pdf-text-01-sec-01",
+          "page_number": 1,
+          "region": {
+            "kind": "page_bbox",
+            "page_bbox": [
+              0.07,
+              0.1048,
+              0.93,
+              0.1446
+            ]
+          },
+          "statement": "On synthetic bench C1, wait 60 seconds for LISN stabilization before logging.",
+          "fact_ids": [
+            "syn-fact-0001"
+          ],
+          "evidence_ids": [
+            "syn-ev-0001"
+          ]
+        },
+        {
+          "section_id": "syn-pdf-text-01-sec-02",
+          "page_number": 1,
+          "region": {
+            "kind": "page_bbox",
+            "page_bbox": [
+              0.07,
+              0.1692,
+              0.93,
+              0.1875
+            ]
+          },
+          "statement": "The teaching sweep band is 150 kHz to 30 MHz.",
+          "fact_ids": [
+            "syn-fact-0002"
+          ],
+          "evidence_ids": [
+            "syn-ev-0002"
+          ]
+        },
+        {
+          "section_id": "syn-pdf-text-01-sec-03",
+          "page_number": 1,
+          "region": {
+            "kind": "page_bbox",
+            "page_bbox": [
+              0.07,
+              0.2121,
+              0.93,
+              0.2519
+            ]
+          },
+          "statement": "Run a peak-detector scan first, then perform a quasi-peak recheck.",
+          "fact_ids": [
+            "syn-fact-0003"
+          ],
+          "evidence_ids": [
+            "syn-ev-0003"
+          ]
+        },
+        {
+          "section_id": "syn-pdf-text-01-sec-04",
+          "page_number": 1,
+          "region": {
+            "kind": "page_bbox",
+            "page_bbox": [
+              0.07,
+              0.2765,
+              0.93,
+              0.3163
+            ]
+          },
+          "statement": "Store one cable-layout photograph with every synthetic pre-scan record.",
+          "fact_ids": [
+            "syn-fact-0004"
+          ],
+          "evidence_ids": [
+            "syn-ev-0004"
+          ]
+        }
+      ],
+      "artifact": {
+        "path": "datasets/generated/documents/synthetic_conducted_prescan.pdf",
+        "sha256": "e56ab310641cb56d86e106d876902040fb6bd26df29a5b8ba649e005602b87fd",
+        "size_bytes": 1263
+      }
+    },
+    {
+      "document_id": "syn-pdf-text-02",
+      "filename": "synthetic_bonding_shielding.pdf",
+      "format": "pdf",
+      "pdf_mode": "text",
+      "role": "primary",
+      "title": "SYN-EMC-LAB-202 Bonding and Shielding Teaching Card",
+      "sections": [
+        {
+          "section_id": "syn-pdf-text-02-sec-01",
+          "page_number": 1,
+          "region": {
+            "kind": "page_bbox",
+            "page_bbox": [
+              0.07,
+              0.1048,
+              0.93,
+              0.1446
+            ]
+          },
+          "statement": "The synthetic service-panel seam teaching target is no more than 0.8 mm.",
+          "fact_ids": [
+            "syn-fact-0005"
+          ],
+          "evidence_ids": [
+            "syn-ev-0005"
+          ]
+        },
+        {
+          "section_id": "syn-pdf-text-02-sec-02",
+          "page_number": 1,
+          "region": {
+            "kind": "page_bbox",
+            "page_bbox": [
+              0.07,
+              0.1692,
+              0.93,
+              0.209
+            ]
+          },
+          "statement": "Use a short flat bonding strap instead of a long round wire in this teaching setup.",
+          "fact_ids": [
+            "syn-fact-0006"
+          ],
+          "evidence_ids": [
+            "syn-ev-0006"
+          ]
+        },
+        {
+          "section_id": "syn-pdf-text-02-sec-03",
+          "page_number": 1,
+          "region": {
+            "kind": "page_bbox",
+            "page_bbox": [
+              0.07,
+              0.2336,
+              0.93,
+              0.2519
+            ]
+          },
+          "statement": "Remove coating at the bonding contact before the torque check.",
+          "fact_ids": [
+            "syn-fact-0007"
+          ],
+          "evidence_ids": [
+            "syn-ev-0007"
+          ]
+        },
+        {
+          "section_id": "syn-pdf-text-02-sec-04",
+          "page_number": 1,
+          "region": {
+            "kind": "page_bbox",
+            "page_bbox": [
+              0.07,
+              0.2765,
+              0.93,
+              0.3163
+            ]
+          },
+          "statement": "After a shielding change, repeat the same antenna position and cable layout.",
+          "fact_ids": [
+            "syn-fact-0008"
+          ],
+          "evidence_ids": [
+            "syn-ev-0008"
+          ]
+        }
+      ],
+      "artifact": {
+        "path": "datasets/generated/documents/synthetic_bonding_shielding.pdf",
+        "sha256": "7b3d0a1fcd8ade4bc8bc8842328ae86282a6ece2a7538a593bec951cda15019b",
+        "size_bytes": 1300
+      }
+    },
+    {
+      "document_id": "syn-pdf-scan-01",
+      "filename": "synthetic_esd_scan.pdf",
+      "format": "pdf",
+      "pdf_mode": "scan",
+      "role": "primary",
+      "title": "SYN-EMC-LAB-303 ESD Observation Sheet",
+      "sections": [
+        {
+          "section_id": "syn-pdf-scan-01-sec-01",
+          "page_number": 1,
+          "region": {
+            "kind": "page_bbox",
+            "page_bbox": [
+              0.05,
+              0.238,
+              0.95,
+              0.3649
+            ]
+          },
+          "statement": "START THE SYNTHETIC ESD SEQUENCE WITH CONTACT DISCHARGE ON CONDUCTIVE POINTS.",
+          "fact_ids": [
+            "syn-fact-0009"
+          ],
+          "evidence_ids": [
+            "syn-ev-0009"
+          ]
+        },
+        {
+          "section_id": "syn-pdf-scan-01-sec-02",
+          "page_number": 1,
+          "region": {
+            "kind": "page_bbox",
+            "page_bbox": [
+              0.05,
+              0.4021,
+              0.95,
+              0.529
+            ]
+          },
+          "statement": "USE AIR DISCHARGE ONLY FOR INSULATING SURFACES OR INACCESSIBLE CONDUCTIVE POINTS.",
+          "fact_ids": [
+            "syn-fact-0010"
+          ],
+          "evidence_ids": [
+            "syn-ev-0010"
+          ]
+        },
+        {
+          "section_id": "syn-pdf-scan-01-sec-03",
+          "page_number": 1,
+          "region": {
+            "kind": "page_bbox",
+            "page_bbox": [
+              0.05,
+              0.5663,
+              0.95,
+              0.6604
+            ]
+          },
+          "statement": "THE DEMO RECOVERY LOG RECORDS THE RESET TYPE AND TIMESTAMP.",
+          "fact_ids": [
+            "syn-fact-0011"
+          ],
+          "evidence_ids": [
+            "syn-ev-0011"
+          ]
+        },
+        {
+          "section_id": "syn-pdf-scan-01-sec-04",
+          "page_number": 1,
+          "region": {
+            "kind": "page_bbox",
+            "page_bbox": [
+              0.05,
+              0.6976,
+              0.95,
+              0.8245
+            ]
+          },
+          "statement": "IF BEHAVIOR CHANGES AFTER DISCHARGE, SAVE THE WAVEFORM AND OPERATOR NOTE BEFORE POWER CYCLING.",
+          "fact_ids": [
+            "syn-fact-0012"
+          ],
+          "evidence_ids": [
+            "syn-ev-0012"
+          ]
+        }
+      ],
+      "artifact": {
+        "path": "datasets/generated/documents/synthetic_esd_scan.pdf",
+        "sha256": "0d5f810acc8700b7d0f1cb4a4d8f260219ce7af5ce6605bc34f4c25579c61b4f",
+        "size_bytes": 9164
+      }
+    },
+    {
+      "document_id": "syn-pdf-scan-02",
+      "filename": "synthetic_cable_scan.pdf",
+      "format": "pdf",
+      "pdf_mode": "scan",
+      "role": "primary",
+      "title": "SYN-EMC-LAB-404 Cable Coupling Sheet",
+      "sections": [
+        {
+          "section_id": "syn-pdf-scan-02-sec-01",
+          "page_number": 1,
+          "region": {
+            "kind": "page_bbox",
+            "page_bbox": [
+              0.05,
+              0.2052,
+              0.95,
+              0.2992
+            ]
+          },
+          "statement": "ROUTE THE HIGH DV DT SWITCH NODE AWAY FROM THE SENSOR RIBBON.",
+          "fact_ids": [
+            "syn-fact-0013"
+          ],
+          "evidence_ids": [
+            "syn-ev-0013"
+          ]
+        },
+        {
+          "section_id": "syn-pdf-scan-02-sec-02",
+          "page_number": 1,
+          "region": {
+            "kind": "page_bbox",
+            "page_bbox": [
+              0.05,
+              0.3365,
+              0.95,
+              0.4306
+            ]
+          },
+          "statement": "CROSS UNAVOIDABLE POWER AND SIGNAL ROUTES AT ABOUT 90 DEGREES.",
+          "fact_ids": [
+            "syn-fact-0014"
+          ],
+          "evidence_ids": [
+            "syn-ev-0014"
+          ]
+        },
+        {
+          "section_id": "syn-pdf-scan-02-sec-03",
+          "page_number": 1,
+          "region": {
+            "kind": "page_bbox",
+            "page_bbox": [
+              0.05,
+              0.4678,
+              0.95,
+              0.5619
+            ]
+          },
+          "statement": "PLACE THE SYNTHETIC CURRENT CLAMP 50 MM FROM CONNECTOR C7.",
+          "fact_ids": [
+            "syn-fact-0015"
+          ],
+          "evidence_ids": [
+            "syn-ev-0015"
+          ]
+        },
+        {
+          "section_id": "syn-pdf-scan-02-sec-04",
+          "page_number": 1,
+          "region": {
+            "kind": "page_bbox",
+            "page_bbox": [
+              0.05,
+              0.5991,
+              0.95,
+              0.726
+            ]
+          },
+          "statement": "FOR THIS DEMO, THE CURRENT PROBE ARROW POINTS TOWARD THE EQUIPMENT UNDER TEST.",
+          "fact_ids": [
+            "syn-fact-0016"
+          ],
+          "evidence_ids": [
+            "syn-ev-0016"
+          ]
+        }
+      ],
+      "artifact": {
+        "path": "datasets/generated/documents/synthetic_cable_scan.pdf",
+        "sha256": "6928612230c61e2ec839f1c21812184428ad25477959988e5ec98794ad3f57e1",
+        "size_bytes": 8440
+      }
+    },
+    {
+      "document_id": "syn-pdf-table-01",
+      "filename": "synthetic_priority_table.pdf",
+      "format": "pdf",
+      "pdf_mode": "table",
+      "role": "primary",
+      "title": "SYN-EMC-LAB-505 Pre-scan Priority Table",
+      "sections": [
+        {
+          "section_id": "syn-pdf-table-01-sec-01",
+          "page_number": 1,
+          "region": {
+            "kind": "table_row",
+            "page_bbox": [
+              0.07,
+              0.1,
+              0.93,
+              0.182
+            ],
+            "table_row": 1
+          },
+          "statement": "Assign P1 when the repeatable synthetic margin is below minus 3 dB.",
+          "fact_ids": [
+            "syn-fact-0017"
+          ],
+          "evidence_ids": [
+            "syn-ev-0017"
+          ]
+        },
+        {
+          "section_id": "syn-pdf-table-01-sec-02",
+          "page_number": 1,
+          "region": {
+            "kind": "table_row",
+            "page_bbox": [
+              0.07,
+              0.188,
+              0.93,
+              0.27
+            ],
+            "table_row": 2
+          },
+          "statement": "Assign P2 when the repeatable synthetic margin is from minus 3 dB through plus 3 dB.",
+          "fact_ids": [
+            "syn-fact-0018"
+          ],
+          "evidence_ids": [
+            "syn-ev-0018"
+          ]
+        },
+        {
+          "section_id": "syn-pdf-table-01-sec-03",
+          "page_number": 1,
+          "region": {
+            "kind": "table_row",
+            "page_bbox": [
+              0.07,
+              0.276,
+              0.93,
+              0.358
+            ],
+            "table_row": 3
+          },
+          "statement": "Assign P3 when the repeatable synthetic margin is above plus 3 dB.",
+          "fact_ids": [
+            "syn-fact-0019"
+          ],
+          "evidence_ids": [
+            "syn-ev-0019"
+          ]
+        },
+        {
+          "section_id": "syn-pdf-table-01-sec-04",
+          "page_number": 1,
+          "region": {
+            "kind": "table_row",
+            "page_bbox": [
+              0.07,
+              0.364,
+              0.93,
+              0.446
+            ],
+            "table_row": 4
+          },
+          "statement": "An owner field is mandatory before a synthetic issue record can be closed.",
+          "fact_ids": [
+            "syn-fact-0020"
+          ],
+          "evidence_ids": [
+            "syn-ev-0020"
+          ]
+        }
+      ],
+      "artifact": {
+        "path": "datasets/generated/documents/synthetic_priority_table.pdf",
+        "sha256": "a69fc7a8a5474a45d17243724a659940d76cb0c19d374a5dd2994dbf5afb4fff",
+        "size_bytes": 1510
+      }
+    },
+    {
+      "document_id": "syn-pdf-table-02",
+      "filename": "synthetic_immunity_table.pdf",
+      "format": "pdf",
+      "pdf_mode": "table",
+      "role": "primary",
+      "title": "SYN-EMC-LAB-606 Immunity Retest Table",
+      "sections": [
+        {
+          "section_id": "syn-pdf-table-02-sec-01",
+          "page_number": 1,
+          "region": {
+            "kind": "table_row",
+            "page_bbox": [
+              0.07,
+              0.1,
+              0.93,
+              0.182
+            ],
+            "table_row": 1
+          },
+          "statement": "The synthetic burst exercise applies stimulation to port P2.",
+          "fact_ids": [
+            "syn-fact-0021"
+          ],
+          "evidence_ids": [
+            "syn-ev-0021"
+          ]
+        },
+        {
+          "section_id": "syn-pdf-table-02-sec-02",
+          "page_number": 1,
+          "region": {
+            "kind": "table_row",
+            "page_bbox": [
+              0.07,
+              0.188,
+              0.93,
+              0.27
+            ],
+            "table_row": 2
+          },
+          "statement": "Use a dwell time of 3 seconds per frequency step in the teaching sweep.",
+          "fact_ids": [
+            "syn-fact-0022"
+          ],
+          "evidence_ids": [
+            "syn-ev-0022"
+          ]
+        },
+        {
+          "section_id": "syn-pdf-table-02-sec-03",
+          "page_number": 1,
+          "region": {
+            "kind": "table_row",
+            "page_bbox": [
+              0.07,
+              0.276,
+              0.93,
+              0.358
+            ],
+            "table_row": 3
+          },
+          "statement": "An unintended reset is a failure criterion in this synthetic exercise.",
+          "fact_ids": [
+            "syn-fact-0023"
+          ],
+          "evidence_ids": [
+            "syn-ev-0023"
+          ]
+        },
+        {
+          "section_id": "syn-pdf-table-02-sec-04",
+          "page_number": 1,
+          "region": {
+            "kind": "table_row",
+            "page_bbox": [
+              0.07,
+              0.364,
+              0.93,
+              0.446
+            ],
+            "table_row": 4
+          },
+          "statement": "The retest must use the locked fictional firmware build DEMO-7A.",
+          "fact_ids": [
+            "syn-fact-0024"
+          ],
+          "evidence_ids": [
+            "syn-ev-0024"
+          ]
+        }
+      ],
+      "artifact": {
+        "path": "datasets/generated/documents/synthetic_immunity_table.pdf",
+        "sha256": "36ee41301402284b81ab521d25ca89fb7f62fc399ecf232dafed786b0e939bfc",
+        "size_bytes": 1482
+      }
+    },
+    {
+      "document_id": "syn-docx-01",
+      "filename": "synthetic_filter_retest.docx",
+      "format": "docx",
+      "pdf_mode": "not_applicable",
+      "role": "primary",
+      "title": "SYN-EMC-LAB-707 滤波复测教学记录",
+      "sections": [
+        {
+          "section_id": "syn-docx-01-sec-01",
+          "page_number": 1,
+          "region": {
+            "kind": "paragraph",
+            "page_bbox": [
+              0.08,
+              0.14,
+              0.92,
+              0.26
+            ],
+            "paragraph_index": 4
+          },
+          "statement": "本合成教学记录规定 C14 的参考电容值为 4.7 nF。",
+          "fact_ids": [
+            "syn-fact-0025"
+          ],
+          "evidence_ids": [
+            "syn-ev-0025"
+          ]
+        },
+        {
+          "section_id": "syn-docx-01-sec-02",
+          "page_number": 1,
+          "region": {
+            "kind": "paragraph",
+            "page_bbox": [
+              0.08,
+              0.32,
+              0.92,
+              0.44
+            ],
+            "paragraph_index": 6
+          },
+          "statement": "虚构磁珠 F2 安装在连接器的线束侧。",
+          "fact_ids": [
+            "syn-fact-0026"
+          ],
+          "evidence_ids": [
+            "syn-ev-0026"
+          ]
+        },
+        {
+          "section_id": "syn-docx-01-sec-03",
+          "page_number": 1,
+          "region": {
+            "kind": "paragraph",
+            "page_bbox": [
+              0.08,
+              0.5,
+              0.92,
+              0.62
+            ],
+            "paragraph_index": 8
+          },
+          "statement": "滤波改动前后对比必须使用相同的接收机带宽。",
+          "fact_ids": [
+            "syn-fact-0027"
+          ],
+          "evidence_ids": [
+            "syn-ev-0027"
+          ]
+        }
+      ],
+      "artifact": {
+        "path": "datasets/generated/documents/synthetic_filter_retest.docx",
+        "sha256": "c3d71603aa78ba16bcddbd5802bab8a06bfff325601cd176c98e323cdf2fd6c1",
+        "size_bytes": 1299
+      }
+    },
+    {
+      "document_id": "syn-docx-02",
+      "filename": "synthetic_chamber_setup.docx",
+      "format": "docx",
+      "pdf_mode": "not_applicable",
+      "role": "primary",
+      "title": "SYN-EMC-LAB-808 场地布置教学记录",
+      "sections": [
+        {
+          "section_id": "syn-docx-02-sec-01",
+          "page_number": 1,
+          "region": {
+            "kind": "paragraph",
+            "page_bbox": [
+              0.08,
+              0.14,
+              0.92,
+              0.26
+            ],
+            "paragraph_index": 4
+          },
+          "statement": "公开合成场地布置中的测试天线距离为 3 m。",
+          "fact_ids": [
+            "syn-fact-0028"
+          ],
+          "evidence_ids": [
+            "syn-ev-0028"
+          ]
+        },
+        {
+          "section_id": "syn-docx-02-sec-02",
+          "page_number": 1,
+          "region": {
+            "kind": "paragraph",
+            "page_bbox": [
+              0.08,
+              0.32,
+              0.92,
+              0.44
+            ],
+            "paragraph_index": 6
+          },
+          "statement": "合成转台每次旋转 45 度。",
+          "fact_ids": [
+            "syn-fact-0029"
+          ],
+          "evidence_ids": [
+            "syn-ev-0029"
+          ]
+        },
+        {
+          "section_id": "syn-docx-02-sec-03",
+          "page_number": 1,
+          "region": {
+            "kind": "paragraph",
+            "page_bbox": [
+              0.08,
+              0.5,
+              0.92,
+              0.62
+            ],
+            "paragraph_index": 8
+          },
+          "statement": "每个最大值都要同时记录极化方向与转台角度。",
+          "fact_ids": [
+            "syn-fact-0030"
+          ],
+          "evidence_ids": [
+            "syn-ev-0030"
+          ]
+        }
+      ],
+      "artifact": {
+        "path": "datasets/generated/documents/synthetic_chamber_setup.docx",
+        "sha256": "f4c3944ba9767b5d39b49f6e92fb46a606fcfe1f31e1e5867b7f552cb3358f47",
+        "size_bytes": 1271
+      }
+    },
+    {
+      "document_id": "syn-docx-03",
+      "filename": "synthetic_diagnosis_notes.docx",
+      "format": "docx",
+      "pdf_mode": "not_applicable",
+      "role": "primary",
+      "title": "SYN-EMC-LAB-909 定位假设教学记录",
+      "sections": [
+        {
+          "section_id": "syn-docx-03-sec-01",
+          "page_number": 1,
+          "region": {
+            "kind": "paragraph",
+            "page_bbox": [
+              0.08,
+              0.14,
+              0.92,
+              0.26
+            ],
+            "paragraph_index": 4
+          },
+          "statement": "如果移动线缆使峰值移动超过 5 MHz，优先检查线缆耦合假设。",
+          "fact_ids": [
+            "syn-fact-0031"
+          ],
+          "evidence_ids": [
+            "syn-ev-0031"
+          ]
+        },
+        {
+          "section_id": "syn-docx-03-sec-02",
+          "page_number": 1,
+          "region": {
+            "kind": "paragraph",
+            "page_bbox": [
+              0.08,
+              0.32,
+              0.92,
+              0.44
+            ],
+            "paragraph_index": 6
+          },
+          "statement": "如果峰值不随负载变化但跟随时钟变化，优先检查时钟谐波假设。",
+          "fact_ids": [
+            "syn-fact-0032"
+          ],
+          "evidence_ids": [
+            "syn-ev-0032"
+          ]
+        },
+        {
+          "section_id": "syn-docx-03-sec-03",
+          "page_number": 1,
+          "region": {
+            "kind": "paragraph",
+            "page_bbox": [
+              0.08,
+              0.5,
+              0.92,
+              0.62
+            ],
+            "paragraph_index": 8
+          },
+          "statement": "近场探头在本合成流程中只用于定位，不用于符合性判定。",
+          "fact_ids": [
+            "syn-fact-0033"
+          ],
+          "evidence_ids": [
+            "syn-ev-0033"
+          ]
+        }
+      ],
+      "artifact": {
+        "path": "datasets/generated/documents/synthetic_diagnosis_notes.docx",
+        "sha256": "262498a2db7c406e01dc5e8fa644d6131ec9b7cf43eeabc54761bc1e1b9099b4",
+        "size_bytes": 1328
+      }
+    },
+    {
+      "document_id": "syn-docx-04",
+      "filename": "synthetic_current_probe.docx",
+      "format": "docx",
+      "pdf_mode": "not_applicable",
+      "role": "primary",
+      "title": "SYN-EMC-LAB-1001 电流路径教学记录",
+      "sections": [
+        {
+          "section_id": "syn-docx-04-sec-01",
+          "page_number": 1,
+          "region": {
+            "kind": "paragraph",
+            "page_bbox": [
+              0.08,
+              0.14,
+              0.92,
+              0.26
+            ],
+            "paragraph_index": 4
+          },
+          "statement": "电流探头基线在辅助线缆断开时采集。",
+          "fact_ids": [
+            "syn-fact-0034"
+          ],
+          "evidence_ids": [
+            "syn-ev-0034"
+          ]
+        },
+        {
+          "section_id": "syn-docx-04-sec-02",
+          "page_number": 1,
+          "region": {
+            "kind": "paragraph",
+            "page_bbox": [
+              0.08,
+              0.32,
+              0.92,
+              0.44
+            ],
+            "paragraph_index": 6
+          },
+          "statement": "辅助线缆应一次只重新连接一根。",
+          "fact_ids": [
+            "syn-fact-0035"
+          ],
+          "evidence_ids": [
+            "syn-ev-0035"
+          ]
+        },
+        {
+          "section_id": "syn-docx-04-sec-03",
+          "page_number": 1,
+          "region": {
+            "kind": "paragraph",
+            "page_bbox": [
+              0.08,
+              0.5,
+              0.92,
+              0.62
+            ],
+            "paragraph_index": 8
+          },
+          "statement": "重新连接后上升超过 6 dB 的路径进入整改复核。",
+          "fact_ids": [
+            "syn-fact-0036"
+          ],
+          "evidence_ids": [
+            "syn-ev-0036"
+          ]
+        }
+      ],
+      "artifact": {
+        "path": "datasets/generated/documents/synthetic_current_probe.docx",
+        "sha256": "0e201190027a0a34e42fc26eb19c4490e1919a0b1f2aaa2e54ba96438c330c0d",
+        "size_bytes": 1275
+      }
+    },
+    {
+      "document_id": "syn-docx-05",
+      "filename": "synthetic_change_closure.docx",
+      "format": "docx",
+      "pdf_mode": "not_applicable",
+      "role": "primary",
+      "title": "SYN-EMC-LAB-1102 整改闭环教学记录",
+      "sections": [
+        {
+          "section_id": "syn-docx-05-sec-01",
+          "page_number": 1,
+          "region": {
+            "kind": "paragraph",
+            "page_bbox": [
+              0.08,
+              0.14,
+              0.92,
+              0.26
+            ],
+            "paragraph_index": 4
+          },
+          "statement": "整改记录必须写明元件位号和元件值。",
+          "fact_ids": [
+            "syn-fact-0037"
+          ],
+          "evidence_ids": [
+            "syn-ev-0037"
+          ]
+        },
+        {
+          "section_id": "syn-docx-05-sec-02",
+          "page_number": 1,
+          "region": {
+            "kind": "paragraph",
+            "page_bbox": [
+              0.08,
+              0.32,
+              0.92,
+              0.44
+            ],
+            "paragraph_index": 6
+          },
+          "statement": "关闭问题前必须确认复测沿用与基线相同的布置标识。",
+          "fact_ids": [
+            "syn-fact-0038"
+          ],
+          "evidence_ids": [
+            "syn-ev-0038"
+          ]
+        },
+        {
+          "section_id": "syn-docx-05-sec-03",
+          "page_number": 1,
+          "region": {
+            "kind": "paragraph",
+            "page_bbox": [
+              0.08,
+              0.5,
+              0.92,
+              0.62
+            ],
+            "paragraph_index": 8
+          },
+          "statement": "未采用的整改方案及其拒绝原因也要保留在决策日志中。",
+          "fact_ids": [
+            "syn-fact-0039"
+          ],
+          "evidence_ids": [
+            "syn-ev-0039"
+          ]
+        }
+      ],
+      "artifact": {
+        "path": "datasets/generated/documents/synthetic_change_closure.docx",
+        "sha256": "8806eb4759fe9827c937603b247f49de0712a2baeb528e12eb25eaea38db3af1",
+        "size_bytes": 1318
+      }
+    },
+    {
+      "document_id": "syn-txt-primary-01",
+      "filename": "synthetic_reporting_boundary.txt",
+      "format": "txt",
+      "pdf_mode": "not_applicable",
+      "role": "primary",
+      "title": "SYN-EMC-LAB-1203 报告边界说明",
+      "sections": [
+        {
+          "section_id": "syn-txt-primary-01-sec-01",
+          "page_number": 1,
+          "region": {
+            "kind": "line_span",
+            "line_start": 4,
+            "line_end": 5
+          },
+          "statement": "最终合成报告必须标注：仅用于训练，不构成认证证据。",
+          "fact_ids": [
+            "syn-fact-0040"
+          ],
+          "evidence_ids": [
+            "syn-ev-0040"
+          ]
+        }
+      ],
+      "artifact": {
+        "path": "datasets/generated/documents/synthetic_reporting_boundary.txt",
+        "sha256": "3aaf29a2cab4ecce663e8d508c55cd5658146f5838ac0eb9de0636ee895dc9fa",
+        "size_bytes": 214
+      }
+    },
+    {
+      "document_id": "syn-txt-distractor-01",
+      "filename": "distractor_marketing_glossary.txt",
+      "format": "txt",
+      "pdf_mode": "not_applicable",
+      "role": "distractor",
+      "title": "干扰项：市场术语表",
+      "sections": [
+        {
+          "section_id": "syn-txt-distractor-01-sec-01",
+          "page_number": 1,
+          "region": {
+            "kind": "line_span",
+            "line_start": 1,
+            "line_end": 4
+          },
+          "statement": "NON-CANONICAL SYNTHETIC DISTRACTOR",
+          "fact_ids": [],
+          "evidence_ids": []
+        }
+      ],
+      "artifact": {
+        "path": "datasets/generated/documents/distractor_marketing_glossary.txt",
+        "sha256": "0e5bd074a16d231df28f896fe112c4766ea93bedb287fd3de3659491626e94a6",
+        "size_bytes": 204
+      }
+    },
+    {
+      "document_id": "syn-txt-distractor-02",
+      "filename": "distractor_retired_draft.txt",
+      "format": "txt",
+      "pdf_mode": "not_applicable",
+      "role": "distractor",
+      "title": "干扰项：已废弃虚构草案",
+      "sections": [
+        {
+          "section_id": "syn-txt-distractor-02-sec-01",
+          "page_number": 1,
+          "region": {
+            "kind": "line_span",
+            "line_start": 1,
+            "line_end": 4
+          },
+          "statement": "NON-CANONICAL SYNTHETIC DISTRACTOR",
+          "fact_ids": [],
+          "evidence_ids": []
+        }
+      ],
+      "artifact": {
+        "path": "datasets/generated/documents/distractor_retired_draft.txt",
+        "sha256": "e64c7209cf9ea34de467488a35531dbe986e1bb9134f3e593439658a5dc983ff",
+        "size_bytes": 232
+      }
+    },
+    {
+      "document_id": "syn-txt-distractor-03",
+      "filename": "distractor_thermal_fixture.txt",
+      "format": "txt",
+      "pdf_mode": "not_applicable",
+      "role": "distractor",
+      "title": "干扰项：热学夹具记录",
+      "sections": [
+        {
+          "section_id": "syn-txt-distractor-03-sec-01",
+          "page_number": 1,
+          "region": {
+            "kind": "line_span",
+            "line_start": 1,
+            "line_end": 4
+          },
+          "statement": "NON-CANONICAL SYNTHETIC DISTRACTOR",
+          "fact_ids": [],
+          "evidence_ids": []
+        }
+      ],
+      "artifact": {
+        "path": "datasets/generated/documents/distractor_thermal_fixture.txt",
+        "sha256": "24d487a4adff985485e6e38a1b98678a9953b2b586aa483da9e2789c48029542",
+        "size_bytes": 170
+      }
+    },
+    {
+      "document_id": "syn-txt-distractor-04",
+      "filename": "distractor_maintenance_calendar.txt",
+      "format": "txt",
+      "pdf_mode": "not_applicable",
+      "role": "distractor",
+      "title": "干扰项：维护日历",
+      "sections": [
+        {
+          "section_id": "syn-txt-distractor-04-sec-01",
+          "page_number": 1,
+          "region": {
+            "kind": "line_span",
+            "line_start": 1,
+            "line_end": 4
+          },
+          "statement": "NON-CANONICAL SYNTHETIC DISTRACTOR",
+          "fact_ids": [],
+          "evidence_ids": []
+        }
+      ],
+      "artifact": {
+        "path": "datasets/generated/documents/distractor_maintenance_calendar.txt",
+        "sha256": "f391fdf3f7a4ae557c81d61bb20008df327697c0a266a8e4341335bb21e9c42a",
+        "size_bytes": 189
+      }
+    }
+  ]
+}

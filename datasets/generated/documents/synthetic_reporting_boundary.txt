@@ -1,0 +1,5 @@
+SYNTHETIC TRAINING FIXTURE - NOT A REAL STANDARD OR CERTIFICATION RECORD
+SYN-EMC-LAB-1203 报告边界说明
+
+[syn-txt-primary-01-sec-01]
+最终合成报告必须标注：仅用于训练，不构成认证证据。

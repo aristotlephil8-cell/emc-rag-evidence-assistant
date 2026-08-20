@@ -1,0 +1,64 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 5 0 R >> >> /Contents 4 0 R >>
+endobj
+4 0 obj
+<< /Length 711 >>
+stream
+BT
+/F1 10 Tf
+50 750 Td
+(SYNTHETIC TRAINING FIXTURE - NOT A REAL STANDARD OR CERTIFICATION RECORD) Tj
+0 -17 Td
+(SYN-EMC-LAB-101 Conducted Pre-scan Teaching Card) Tj
+0 -17 Td
+() Tj
+0 -17 Td
+([syn-pdf-text-01-sec-01] On synthetic bench C1, wait 60 seconds for LISN stabilization) Tj
+0 -17 Td
+(before logging.) Tj
+0 -17 Td
+() Tj
+0 -17 Td
+([syn-pdf-text-01-sec-02] The teaching sweep band is 150 kHz to 30 MHz.) Tj
+0 -17 Td
+() Tj
+0 -17 Td
+([syn-pdf-text-01-sec-03] Run a peak-detector scan first, then perform a quasi-peak) Tj
+0 -17 Td
+(recheck.) Tj
+0 -17 Td
+() Tj
+0 -17 Td
+([syn-pdf-text-01-sec-04] Store one cable-layout photograph with every synthetic pre-scan) Tj
+0 -17 Td
+(record.) Tj
+0 -17 Td
+() Tj
+0 -17 Td
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000015 00000 n 
+0000000064 00000 n 
+0000000121 00000 n 
+0000000247 00000 n 
+0000001009 00000 n 
+trailer
+<< /Size 6 /Root 1 0 R >>
+startxref
+1079
+%%EOF

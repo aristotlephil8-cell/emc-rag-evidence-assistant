@@ -1,0 +1,89 @@
+{
+  "schema_version": 1,
+  "asset_set": "infiniflow-deepdoc-cvrag-v1",
+  "source_repository": "InfiniFlow/deepdoc",
+  "source_revision": "de0e793dc6d744406c96dabd688ccc969f41b443",
+  "license": "Apache-2.0",
+  "assets": [
+    {
+      "filename": "det.onnx",
+      "role": "ocr_detection",
+      "size_bytes": 4745517,
+      "sha256": "30a86f5731181461d08021402766601e4302a9b9b9666be8aff402696339cdff",
+      "source_revision": "de0e793dc6d744406c96dabd688ccc969f41b443",
+      "source_url": "https://huggingface.co/InfiniFlow/deepdoc/resolve/de0e793dc6d744406c96dabd688ccc969f41b443/det.onnx",
+      "license": "Apache-2.0",
+      "role_check": {
+        "input_name": "x",
+        "input_type": "tensor(float)",
+        "input_shape": [null, 3, null, null],
+        "output_name": "sigmoid_0.tmp_0",
+        "output_type": "tensor(float)",
+        "output_shape": [null, 1, null, null]
+      }
+    },
+    {
+      "filename": "rec.onnx",
+      "role": "ocr_recognition",
+      "size_bytes": 10826336,
+      "sha256": "1c7cf60de2afd728d512f4190cf37455092b45f06175365c6fc58d8cd7e2a68b",
+      "source_revision": "de0e793dc6d744406c96dabd688ccc969f41b443",
+      "source_url": "https://huggingface.co/InfiniFlow/deepdoc/resolve/de0e793dc6d744406c96dabd688ccc969f41b443/rec.onnx",
+      "license": "Apache-2.0",
+      "role_check": {
+        "input_name": "x",
+        "input_type": "tensor(float)",
+        "input_shape": [null, 3, 48, null],
+        "output_name": "softmax_11.tmp_0",
+        "output_type": "tensor(float)",
+        "output_shape": [null, null, 6625]
+      }
+    },
+    {
+      "filename": "ocr.res",
+      "role": "ocr_charset",
+      "size_bytes": 26249,
+      "sha256": "28b2362ad4ab2dc38769aa72feb535e3a9ddb3fd2a7585a05920e6393b1dc7f7",
+      "source_revision": "de0e793dc6d744406c96dabd688ccc969f41b443",
+      "source_url": "https://huggingface.co/InfiniFlow/deepdoc/resolve/de0e793dc6d744406c96dabd688ccc969f41b443/ocr.res",
+      "license": "Apache-2.0",
+      "role_check": {
+        "utf8_line_count": 6623
+      }
+    },
+    {
+      "filename": "layout.onnx",
+      "role": "layout_detection",
+      "size_bytes": 75726930,
+      "sha256": "de401c03ee30b1c120416dc06f0705237f0c36d3cdb692c9bfefe8a8f98a4b70",
+      "source_revision": "de0e793dc6d744406c96dabd688ccc969f41b443",
+      "source_url": "https://huggingface.co/InfiniFlow/deepdoc/resolve/de0e793dc6d744406c96dabd688ccc969f41b443/layout.onnx",
+      "license": "Apache-2.0",
+      "role_check": {
+        "input_name": "images",
+        "input_type": "tensor(float)",
+        "input_shape": [1, 3, 1024, 1024],
+        "output_name": "output0",
+        "output_type": "tensor(float)",
+        "output_shape": [1, 300, 6]
+      }
+    },
+    {
+      "filename": "tsr.onnx",
+      "role": "table_structure_detection",
+      "size_bytes": 12243033,
+      "sha256": "1585f88015c60209f16a079a26d944afca790ab7022fe7d0574113ccb9a6f9b4",
+      "source_revision": "de0e793dc6d744406c96dabd688ccc969f41b443",
+      "source_url": "https://huggingface.co/InfiniFlow/deepdoc/resolve/de0e793dc6d744406c96dabd688ccc969f41b443/tsr.onnx",
+      "license": "Apache-2.0",
+      "role_check": {
+        "input_name": "images",
+        "input_type": "tensor(float)",
+        "input_shape": [1, 3, 640, 640],
+        "output_name": "output0",
+        "output_type": "tensor(float)",
+        "output_shape": [1, 11, 8400]
+      }
+    }
+  ]
+}

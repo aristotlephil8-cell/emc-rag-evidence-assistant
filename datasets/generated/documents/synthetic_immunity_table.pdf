@@ -1,0 +1,95 @@
+%PDF-1.4
+%‚„œ”
+1 0 obj
+<< /Type /Catalog /Pages 2 0 R >>
+endobj
+2 0 obj
+<< /Type /Pages /Kids [3 0 R] /Count 1 >>
+endobj
+3 0 obj
+<< /Type /Page /Parent 2 0 R /MediaBox [0 0 612 792] /Resources << /Font << /F1 5 0 R >> >> /Contents 4 0 R >>
+endobj
+4 0 obj
+<< /Length 930 >>
+stream
+0.8 w
+45 630 522 70 re S
+45 560 522 70 re S
+45 490 522 70 re S
+45 420 522 70 re S
+145 420 m 145 700 l S
+BT
+/F1 10 Tf
+50 765 Td
+(SYNTHETIC TRAINING FIXTURE - NOT A REAL STANDARD OR CERTIFICATION RECORD) Tj
+0 -27 Td
+(SYN-EMC-LAB-606 Immunity Retest Table) Tj
+ET
+BT
+/F1 8 Tf
+50 672 Td
+(syn-pdf-table-02-sec-01) Tj
+ET
+BT
+/F1 8 Tf
+150 672 Td
+(The synthetic burst exercise applies stimulation to port P2.) Tj
+ET
+BT
+/F1 8 Tf
+50 602 Td
+(syn-pdf-table-02-sec-02) Tj
+ET
+BT
+/F1 8 Tf
+150 602 Td
+(Use a dwell time of 3 seconds per frequency step in the teaching) Tj
+ET
+BT
+/F1 8 Tf
+150 590 Td
+(sweep.) Tj
+ET
+BT
+/F1 8 Tf
+50 532 Td
+(syn-pdf-table-02-sec-03) Tj
+ET
+BT
+/F1 8 Tf
+150 532 Td
+(An unintended reset is a failure criterion in this synthetic) Tj
+ET
+BT
+/F1 8 Tf
+150 520 Td
+(exercise.) Tj
+ET
+BT
+/F1 8 Tf
+50 462 Td
+(syn-pdf-table-02-sec-04) Tj
+ET
+BT
+/F1 8 Tf
+150 462 Td
+(The retest must use the locked fictional firmware build DEMO-7A.) Tj
+ET
+endstream
+endobj
+5 0 obj
+<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>
+endobj
+xref
+0 6
+0000000000 65535 f 
+0000000015 00000 n 
+0000000064 00000 n 
+0000000121 00000 n 
+0000000247 00000 n 
+0000001228 00000 n 
+trailer
+<< /Size 6 /Root 1 0 R >>
+startxref
+1298
+%%EOF

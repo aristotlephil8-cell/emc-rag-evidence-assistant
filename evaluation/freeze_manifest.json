@@ -1,0 +1,117 @@
+{
+  "schema_version": 1,
+  "corpus_version": "verified-synthetic-v2",
+  "dataset_label": "VERIFIED_SYNTHETIC",
+  "created_at": "2026-08-20T00:00:00Z",
+  "hash_algorithm": "sha256",
+  "generator": {
+    "path": "datasets/scripts/generate_synthetic_corpus.py",
+    "sha256": "06452363d1d8f841e5232f90f1b8bb360d78260e57e3184c2c829faa614e7eb5"
+  },
+  "counts": {
+    "logical_documents": 16,
+    "cases": 40,
+    "answerable": 32,
+    "unanswerable": 8,
+    "dev": 24,
+    "test": 16,
+    "required_evidence": 40
+  },
+  "files": [
+    {
+      "path": "datasets/generated/canonical_facts.jsonl",
+      "sha256": "27349f5c5379a3ca62dff9f272530e34212d378a1b3d55ace75aad2601865e95",
+      "size_bytes": 17760
+    },
+    {
+      "path": "datasets/generated/corpus_manifest.json",
+      "sha256": "59be24c7a2be655a21e63b810d9aeb9191a35a83da30921eb4752ed3822df94c",
+      "size_bytes": 31091
+    },
+    {
+      "path": "datasets/generated/documents/distractor_maintenance_calendar.txt",
+      "sha256": "f391fdf3f7a4ae557c81d61bb20008df327697c0a266a8e4341335bb21e9c42a",
+      "size_bytes": 189
+    },
+    {
+      "path": "datasets/generated/documents/distractor_marketing_glossary.txt",
+      "sha256": "0e5bd074a16d231df28f896fe112c4766ea93bedb287fd3de3659491626e94a6",
+      "size_bytes": 204
+    },
+    {
+      "path": "datasets/generated/documents/distractor_retired_draft.txt",
+      "sha256": "e64c7209cf9ea34de467488a35531dbe986e1bb9134f3e593439658a5dc983ff",
+      "size_bytes": 232
+    },
+    {
+      "path": "datasets/generated/documents/distractor_thermal_fixture.txt",
+      "sha256": "24d487a4adff985485e6e38a1b98678a9953b2b586aa483da9e2789c48029542",
+      "size_bytes": 170
+    },
+    {
+      "path": "datasets/generated/documents/synthetic_bonding_shielding.pdf",
+      "sha256": "7b3d0a1fcd8ade4bc8bc8842328ae86282a6ece2a7538a593bec951cda15019b",
+      "size_bytes": 1300
+    },
+    {
+      "path": "datasets/generated/documents/synthetic_cable_scan.pdf",
+      "sha256": "6928612230c61e2ec839f1c21812184428ad25477959988e5ec98794ad3f57e1",
+      "size_bytes": 8440
+    },
+    {
+      "path": "datasets/generated/documents/synthetic_chamber_setup.docx",
+      "sha256": "f4c3944ba9767b5d39b49f6e92fb46a606fcfe1f31e1e5867b7f552cb3358f47",
+      "size_bytes": 1271
+    },
+    {
+      "path": "datasets/generated/documents/synthetic_change_closure.docx",
+      "sha256": "8806eb4759fe9827c937603b247f49de0712a2baeb528e12eb25eaea38db3af1",
+      "size_bytes": 1318
+    },
+    {
+      "path": "datasets/generated/documents/synthetic_conducted_prescan.pdf",
+      "sha256": "e56ab310641cb56d86e106d876902040fb6bd26df29a5b8ba649e005602b87fd",
+      "size_bytes": 1263
+    },
+    {
+      "path": "datasets/generated/documents/synthetic_current_probe.docx",
+      "sha256": "0e201190027a0a34e42fc26eb19c4490e1919a0b1f2aaa2e54ba96438c330c0d",
+      "size_bytes": 1275
+    },
+    {
+      "path": "datasets/generated/documents/synthetic_diagnosis_notes.docx",
+      "sha256": "262498a2db7c406e01dc5e8fa644d6131ec9b7cf43eeabc54761bc1e1b9099b4",
+      "size_bytes": 1328
+    },
+    {
+      "path": "datasets/generated/documents/synthetic_esd_scan.pdf",
+      "sha256": "0d5f810acc8700b7d0f1cb4a4d8f260219ce7af5ce6605bc34f4c25579c61b4f",
+      "size_bytes": 9164
+    },
+    {
+      "path": "datasets/generated/documents/synthetic_filter_retest.docx",
+      "sha256": "c3d71603aa78ba16bcddbd5802bab8a06bfff325601cd176c98e323cdf2fd6c1",
+      "size_bytes": 1299
+    },
+    {
+      "path": "datasets/generated/documents/synthetic_immunity_table.pdf",
+      "sha256": "36ee41301402284b81ab521d25ca89fb7f62fc399ecf232dafed786b0e939bfc",
+      "size_bytes": 1482
+    },
+    {
+      "path": "datasets/generated/documents/synthetic_priority_table.pdf",
+      "sha256": "a69fc7a8a5474a45d17243724a659940d76cb0c19d374a5dd2994dbf5afb4fff",
+      "size_bytes": 1510
+    },
+    {
+      "path": "datasets/generated/documents/synthetic_reporting_boundary.txt",
+      "sha256": "3aaf29a2cab4ecce663e8d508c55cd5658146f5838ac0eb9de0636ee895dc9fa",
+      "size_bytes": 214
+    },
+    {
+      "path": "evaluation/frozen_cases.jsonl",
+      "sha256": "3d2a35c4c8d285519d2d0788e43d27b9a769c5820666e734c0874878f66c3315",
+      "size_bytes": 24280
+    }
+  ]
+}

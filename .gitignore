@@ -7,6 +7,7 @@
 __pycache__/
 *.py[cod]
 .pytest_cache/
+pytest-cache-files-*/
 .ruff_cache/
 .coverage
 htmlcov/
@@ -29,6 +30,7 @@ tmp/
 artifacts/local/
 playwright-report/
 test-results/
+.cvrag-test-*/
 
 # IDE and OS
 .idea/
