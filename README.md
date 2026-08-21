@@ -71,82 +71,78 @@ flowchart LR
 
 ### 项目整体架构
 
-架构设计直接来源于业务需求：资料需要持续更新、版本切换和幂等重试，因此由 PostgreSQL 管理用户、文档、版本和任务等业务事实，Elasticsearch 保存可重建的倒排与向量索引，原始文件独立存储；复杂文档解析不能阻塞在线查询，因此将 ingestion pipeline 与 query pipeline 分开，Redis 负责进度、缓存和临时状态；回答必须能够复核，因此按 retrieval、evidence assembly、generation 和 citation validation 分层，并在高风险场景进入 human-in-the-loop。
+主架构图以历史 emcRAG 项目的完整业务架构为准。系统面向电磁兼容试验与整改场景，将前端、应用服务、确定性业务工作流、RAG 引擎、数据层和模型层组织成一条可追溯的业务链路。架构设计直接来源于业务需求：工作流负责控制“当前走哪一步、是否需要人工确认”，RAG 引擎负责“如何解析、检索和生成”，数据层负责版本、索引和审计记录，模型层负责 OCR、向量化、重排和回答生成。
 
-核心原则是：**让知识可更新、检索可重建、回答可追溯，高风险结论可由工程师接管。**
+核心原则是：**让业务流程可审计，知识检索可追溯，高风险结论可由工程师接管。**
 
 ```mermaid
 flowchart TB
-    U[产品研发 / 送试人员 / EMC工程师]
-    UI[React 前端<br/>资料管理 · 问答 · 引用查看 · 人工确认]
-    API[FastAPI 应用服务<br/>认证 · 权限 · 任务状态 · RAG流程编排]
-
-    subgraph OFF[资料入库链路]
-        direction LR
-        UP[上传标准、手册、报告和整改案例]
-        PARSE[格式路由<br/>原生解析 · OCR补偿 · 表格处理]
-        CHUNK[结构化切分<br/>章节 · 条款 · 页码 · 来源定位]
-        EMB[Embedding]
-        UP --> PARSE --> CHUNK --> EMB
+    subgraph FE[① 前端 React + Ant Design]
+        UI1[对话与问题澄清]
+        UI2[知识库管理]
+        UI3[报告上传与字段确认]
+        UI4[整改建议与引用查看]
     end
 
-    subgraph ONLINE[在线问答链路]
-        direction LR
-        Q[用户问题]
-        NORM[查询规范化<br/>权限 / 版本 / 资料类型过滤]
-        RET[BM25 + 向量并行召回]
-        RRF[RRF融合与去重]
-        RERANK[Reranker精排]
-        EVIDENCE[结构化证据组装]
-        GEN[大模型生成候选回答]
-        CHECK[引用、充分性和风险校验]
-        RESULT{处理结果}
-        ANSWER[回答 + 页码/条款/案例引用]
-        REVIEW[澄清、拒答或人工确认]
-        Q --> NORM --> RET --> RRF --> RERANK --> EVIDENCE --> GEN --> CHECK --> RESULT
-        RESULT -->|证据充分| ANSWER
-        RESULT -->|证据不足 / 冲突 / 高风险| REVIEW
+    subgraph API[② 应用服务层 FastAPI]
+        AUTH[认证与权限]
+        AUDIT[审计日志<br/>候选 · 引用 · 人工修正]
     end
 
-    PG[(PostgreSQL<br/>用户 · 项目 · 文档台账<br/>版本 · 权限 · 任务状态)]
-    ES[(Elasticsearch<br/>BM25 · 向量索引<br/>可重建检索数据)]
-    REDIS[(Redis<br/>进度 · 缓存 · 临时解析数据)]
-    FILES[(文件存储<br/>原始文档)]
+    subgraph WF[③ 确定性业务工作流]
+        W1[问题澄清] --> W2[试验类型推荐]
+        W2 --> W3[试验方案生成]
+        W3 --> W4[报告解析与字段确认]
+        W4 --> W5[案例检索与原因分析]
+        W5 --> W6[整改建议与复验方案]
+    end
 
-    U --> UI --> API
-    API --> UP
-    API --> Q
-    API --> PG
-    API --> REDIS
-    UP --> FILES
-    CHUNK --> PG
-    EMB --> ES
-    NORM --> PG
+    subgraph RAG[RAG 引擎层]
+        direction LR
+        ING[资料入库<br/>格式解析 · OCR · 结构化切分 · 元数据]
+        RET[检索管道<br/>查询路由 · 元数据过滤 · BM25 + kNN · Rerank]
+        GEN[生成与引用<br/>结构化输出 · 条款/页码引用 · 证据不足拒答]
+        ING --> RET --> GEN
+    end
+
+    subgraph DATA[⑤ 数据层]
+        PG[(PostgreSQL<br/>业务数据 · 项目 · 会话 · 审计)]
+        ES[(Elasticsearch<br/>倒排索引 · 向量索引)]
+        RD[(Redis<br/>任务队列 · 进度 · 临时缓存)]
+        FS[/文件存储<br/>原始文档/]
+    end
+
+    subgraph MODEL[⑥ 模型层]
+        M1[Qwen / vLLM<br/>生成模型]
+        M2[bge-m3 / Reranker<br/>向量化与精排]
+        M3[OCR / 版面 / 表格<br/>视觉解析模型]
+    end
+
+    FE --> API --> WF --> RAG
+    ING --> ES
+    ING --> FS
+    ING --> RD
     RET --> ES
-    CHECK --> PG
-    ANSWER --> UI
-    REVIEW --> UI
-
-    classDef actor fill:#E8F1FF,stroke:#3B82F6,color:#123B72,stroke-width:1.5px;
-    classDef service fill:#F3F4F6,stroke:#64748B,color:#1E293B,stroke-width:1px;
-    classDef evidence fill:#ECFDF5,stroke:#10B981,color:#065F46,stroke-width:1.5px;
-    classDef review fill:#FFF7ED,stroke:#F97316,color:#9A3412,stroke-width:1.5px;
-    classDef store fill:#F5F3FF,stroke:#8B5CF6,color:#5B21B6,stroke-width:1.2px;
-    class U,UI actor;
-    class API,UP,PARSE,CHUNK,EMB,Q,NORM,RET,RRF,RERANK,EVIDENCE,GEN,CHECK service;
-    class RESULT,ANSWER evidence;
-    class REVIEW review;
-    class PG,ES,REDIS,FILES store;
+    API --> PG
+    RAG --> MODEL
 ```
 
 ### 快速启动
 
 前置条件：Docker Desktop / Docker Engine、Docker Compose v2。首次启动会下载并校验固定版本的 DeepDOC 模型资产；模型体积不计入 Git 仓库。
 
-默认使用 fake Provider：
+项目通过 Docker Compose 启动前端、FastAPI、Elasticsearch 和 DeepDOC 资源服务。默认使用确定性离线 Provider（代码配置值为 `offline`）；`start.ps1` 只是对 Docker Compose 启动流程的封装，会先校验 Compose 配置，再执行构建、启动和健康检查。
 
 ```powershell
-.\scripts\start.ps1 -Provider fake
+.\scripts\start.ps1 -Provider offline
+```
+
+也可以直接使用 Docker Compose：
+
+```powershell
+$env:CVRAG_PROVIDER = "offline"
+$env:CVRAG_REQUIRE_EVALUATION_LOCK = "false"
+docker compose up -d --build --wait
 ```
 
 打开：
@@ -155,7 +151,7 @@ flowchart TB
 - 后端与 OpenAPI：<http://localhost:8000/docs>
 - 健康检查：<http://localhost:8000/health>
 
-fake Provider 的向量、重排和答案是确定性占位行为，只适合走通入库、API、SSE 和 UI，不得据此发布效果指标。可从 `datasets/generated/documents/` 上传公开合成样例。
+确定性离线 Provider 的向量、重排和答案是离线占位行为，只适合走通入库、API、SSE 和 UI，不得据此发布效果指标。可从 `datasets/generated/documents/` 上传公开合成样例。
 
 停止服务但保留命名卷：
 
@@ -175,7 +171,7 @@ $env:DASHSCOPE_API_KEY = "<set-locally-never-commit>"
 
 DashScope 展示模式会读取已通过评测报告中的 `runtime_config + config_hash`，并校验模型、Parser/Chunker/索引版本、检索参数和 dev 锁定拒答阈值；报告缺失、门禁失败或配置漂移时拒绝启动。
 
-> **数据外发警示：** DashScope 模式会把上传文档的切块文本发送给远端 Embedding 服务，把查询及候选文本发送给 Rerank 服务，并把查询及 Top 5 证据发送给生成服务。只有在你有权处理并外发这些内容时才可启用。fake 模式不产生此类模型 API 外发。
+> **数据外发警示：** DashScope 模式会把上传文档的切块文本发送给远端 Embedding 服务，把查询及候选文本发送给 Rerank 服务，并把查询及 Top 5 证据发送给生成服务。只有在你有权处理并外发这些内容时才可启用。offline 模式不产生此类模型 API 外发。
 
 更多凭据、端口、文件与错误信息边界见 [安全说明](docs/SECURITY.md)。
 
@@ -224,7 +220,7 @@ Business problem
 
 ### Project architecture
 
-The project-level architecture consists of a React frontend, FastAPI orchestration service, PostgreSQL for business facts and document state, Elasticsearch for rebuildable retrieval indexes, Redis for progress and temporary data, and file storage for original documents. The main flow is shown in the Chinese section above; detailed data flow is documented in [Architecture](docs/ARCHITECTURE.md).
+The project-level architecture follows the actual runtime: a React/Vite frontend and FastAPI API sit above two pipelines. The ingestion pipeline routes PDF, DOCX, and TXT files through text parsing or DeepDOC/OCR, creates structured chunks, records lifecycle state in SQLite, and writes rebuildable BM25/vector indexes to Elasticsearch. The online pipeline combines retrieval, RRF, reranking, evidence assembly, generation, and citation validation. Offline or DashScope providers supply model capabilities; evaluation and Badcase regression validate the pipeline without becoming a request-time dependency. Detailed data flow is documented in [Architecture](docs/ARCHITECTURE.md).
 
 ### Local reproduction
 
@@ -235,7 +231,7 @@ The commands below start the public local reproduction environment:
 Prerequisites: Docker Engine/Desktop and Docker Compose v2. The first start downloads and verifies pinned DeepDOC assets; model binaries are excluded from Git.
 
 ```powershell
-.\scripts\start.ps1 -Provider fake
+.\scripts\start.ps1 -Provider offline
 ```
 
 Open <http://localhost:5173> for the UI and <http://localhost:8000/docs> for OpenAPI. Upload only material you are authorized to process; the committed examples are under `datasets/generated/documents/`.
@@ -244,7 +240,7 @@ Open <http://localhost:5173> for the UI and <http://localhost:8000/docs> for Ope
 .\scripts\stop.ps1
 ```
 
-The fake provider is deterministic contract scaffolding for the local reproduction flow; it is not semantic retrieval, reranking, or answer-quality evidence.
+The offline provider is deterministic contract scaffolding for the local reproduction flow; it is not semantic retrieval, reranking, or answer-quality evidence.
 
 For DashScope mode, inject `DASHSCOPE_API_KEY` into the current process—never commit it—run `evaluate.ps1`, and only then run `start.ps1 -Provider dashscope`. Startup validates the passed report's runtime configuration hash and locked dev threshold; a missing, failed, or drifted report is rejected. This mode sends document chunks, queries, candidates, and selected evidence to remote model APIs. Review [Security](docs/SECURITY.md) before enabling it.
 
