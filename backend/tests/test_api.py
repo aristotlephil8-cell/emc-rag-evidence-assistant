@@ -129,7 +129,7 @@ def test_needs_review_never_streams_unvalidated_answer_or_source() -> None:
 def test_missing_evaluation_report_is_not_mislabeled_as_verified(tmp_path) -> None:
     current_settings = Settings(
         CVRAG_EVALUATION_REPORT=tmp_path / "missing.json",
-        CVRAG_PROVIDER="fake",
+        CVRAG_PROVIDER="offline",
     )
     app.dependency_overrides[get_settings] = lambda: current_settings
     try:

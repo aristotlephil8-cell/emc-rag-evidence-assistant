@@ -100,7 +100,7 @@ export function ChatPanel() {
   }
 
   const hasResult = Boolean(answer || status || error || sources.length)
-  const isOfflineFake = evidenceStatus === 'IMPLEMENTED_FAKE_VERIFIED'
+  const isOfflineProvider = evidenceStatus === 'IMPLEMENTED_OFFLINE_VERIFIED'
 
   return (
     <section className="chat-workspace" aria-labelledby="qa-heading">
@@ -176,11 +176,11 @@ export function ChatPanel() {
         <div className="answer-heading">
           <div>
             <span className="eyebrow">
-              {isOfflineFake ? 'FAKE PROVIDER OUTPUT' : 'GROUNDED RESPONSE'}
+              {isOfflineProvider ? 'OFFLINE PROVIDER OUTPUT' : 'GROUNDED RESPONSE'}
             </span>
-            <h2>{isOfflineFake ? '离线证据占位回显' : '证据回答'}</h2>
+            <h2>{isOfflineProvider ? '离线证据占位回显' : '证据回答'}</h2>
           </div>
-          {status && !isOfflineFake && <StatusBadge status={status} />}
+          {status && !isOfflineProvider && <StatusBadge status={status} />}
           {streaming && (
             <span className="stream-indicator" role="status">
               <i /><span>正在生成</span>
@@ -188,13 +188,13 @@ export function ChatPanel() {
           )}
         </div>
 
-        {isOfflineFake && (
-          <div className="offline-fake-banner" role="alert">
+        {isOfflineProvider && (
+          <div className="offline-provider-banner" role="alert">
             <WarningIcon />
             <div>
-              <strong>OFFLINE_FAKE / NOT EFFECTIVENESS EVIDENCE</strong>
+              <strong>OFFLINE_PROVIDER / NOT EFFECTIVENESS EVIDENCE</strong>
               <p>
-                当前内容是离线 Fake Provider 对首条证据的占位回显，不是模型生成结果，
+                当前内容是离线 Provider 对首条证据的占位回显，不是模型生成结果，
                 也不构成检索、回答或引用效果证明。
               </p>
             </div>

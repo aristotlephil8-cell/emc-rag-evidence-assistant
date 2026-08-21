@@ -25,7 +25,7 @@ class Settings(BaseSettings):
     ELASTICSEARCH_URL: str = "http://localhost:9200"
     CVRAG_DATABASE_URL: str = "sqlite:///./data/runtime/cvrag.db"
     CVRAG_MODEL_DIR: Path = Path("models/deepdoc")
-    CVRAG_PROVIDER: str = Field(default="dashscope", pattern="^(dashscope|fake)$")
+    CVRAG_PROVIDER: str = Field(default="dashscope", pattern="^(dashscope|offline)$")
     CVRAG_INDEX_NAME: str = "cvrag-chunks-v1"
     CVRAG_EVALUATION_REPORT: Path = Path("artifacts/evaluation/latest.json")
     CVRAG_REFUSAL_THRESHOLD: float = Field(default=0.45, ge=0.0, le=1.0)

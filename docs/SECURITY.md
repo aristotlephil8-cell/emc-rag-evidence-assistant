@@ -10,7 +10,7 @@ Provider mode materially changes the data boundary:
 
 | Mode | Outbound model data |
 | --- | --- |
-| `fake` | No Embedding/Rerank/Generation model API call. Deterministic placeholders only. |
+| `offline` | No Embedding/Rerank/Generation model API call. Deterministic placeholders only. |
 | `dashscope` | Document chunks go to Embedding; query and candidates go to Rerank; query and final Top 5 evidence go to Generation. |
 
 Before using DashScope, confirm that you own or are authorized to process and transmit every uploaded document. Do not upload confidential, personal, export-controlled, customer, internal laboratory, or licensed-standard content without the corresponding permission and policy review.
@@ -22,7 +22,7 @@ Before using DashScope, confirm that you own or are authorized to process and tr
 - Keep `DASHSCOPE_API_KEY` in the current process or an approved local secret manager.
 - Never put a real key in `.env.example`, source code, command history, screenshots, logs, issues, PR text, or committed files.
 - `.env` is ignored by Git, but an ignored plaintext file is still a local secret risk.
-- CI uses the fake Provider and must not store or require a DashScope secret.
+- CI uses the offline Provider and must not store or require a DashScope secret.
 - If a credential is exposed, revoke/rotate it through the provider; deleting it from the latest file is not sufficient once history or logs contain it.
 
 ## Network / 网络

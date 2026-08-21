@@ -16,7 +16,7 @@ flowchart TB
       API[FastAPI /api/v1]
       META[(SQLite document lifecycle)]
       ES[(Elasticsearch stable alias)]
-      MODELS[Fake or DashScope provider]
+      MODELS[Offline or DashScope provider]
       DD[DeepDOC worker]
       ASSETS[(Pinned ONNX assets)]
     end
@@ -134,7 +134,7 @@ Terminal states:
 
 | Provider | Purpose | Evidence label |
 | --- | --- | --- |
-| `fake` | Deterministic API, UI, unit-test and CI scaffolding | `IMPLEMENTED_FAKE_VERIFIED`; never effectiveness evidence |
+| `offline` | Deterministic API, UI, unit-test and CI scaffolding | `IMPLEMENTED_OFFLINE_VERIFIED`; never effectiveness evidence |
 | `dashscope` | `text-embedding-v4`, `qwen3-rerank`, `qwen3.7-plus-2026-05-26` | `VERIFIED_SYNTHETIC` only for the committed public evaluation report; not real-standard, private-corpus, or production evidence |
 
 DashScope mode is an outbound-data boundary. See [SECURITY.md](SECURITY.md).

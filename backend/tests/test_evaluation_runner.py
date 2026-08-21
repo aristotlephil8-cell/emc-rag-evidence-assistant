@@ -264,7 +264,7 @@ def test_full_16_document_runtime_locator_audit() -> None:
 
 def test_rerank_degradation_cannot_emit_verified_synthetic(monkeypatch, tmp_path) -> None:
     class Provider:
-        evidence_status = "IMPLEMENTED_FAKE_VERIFIED"
+        evidence_status = "IMPLEMENTED_OFFLINE_VERIFIED"
 
         def close(self) -> None:
             return None
@@ -324,7 +324,7 @@ def test_rerank_degradation_cannot_emit_verified_synthetic(monkeypatch, tmp_path
 
     report = RUNNER.run(
         SimpleNamespace(
-            provider="fake",
+            provider="offline",
             model_dir=tmp_path,
             elasticsearch_url="http://127.0.0.1:9200",
         )

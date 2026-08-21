@@ -8,5 +8,5 @@ records the exact corpus/configuration hashes, all gates, and limitations.
 The report does not establish real-standard coverage, private-corpus quality,
 laboratory accreditation, user-trial evidence, or production performance.
 
-The default fake-provider Docker demo must not create or publish effectiveness
+The default offline-provider Docker demo must not create or publish effectiveness
 metrics in this directory.

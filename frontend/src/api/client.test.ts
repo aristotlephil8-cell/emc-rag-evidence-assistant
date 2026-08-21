@@ -9,7 +9,7 @@ describe('streamChat request contract', () => {
   it('posts the backend-locked query field and consumes done', async () => {
     const fetchMock = vi.fn().mockResolvedValue(
       new Response(
-        'event: done\ndata: {"status":"answered","evidence_status":"implemented_fake_verified"}\n\n',
+        'event: done\ndata: {"status":"answered","evidence_status":"implemented_offline_verified"}\n\n',
         {
         status: 200,
         headers: { 'Content-Type': 'text/event-stream' },
@@ -33,7 +33,7 @@ describe('streamChat request contract', () => {
     })
     expect(onDone).toHaveBeenCalledWith({
       status: 'answered',
-      evidence_status: 'IMPLEMENTED_FAKE_VERIFIED',
+      evidence_status: 'IMPLEMENTED_OFFLINE_VERIFIED',
     })
   })
 

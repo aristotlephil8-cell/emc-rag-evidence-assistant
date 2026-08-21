@@ -1,6 +1,6 @@
 [CmdletBinding()]
 param(
-    [ValidateSet("fake", "dashscope")]
+    [ValidateSet("offline", "dashscope")]
     [string]$Provider,
     [switch]$SkipBuild
 )
@@ -8,10 +8,10 @@ param(
 $ErrorActionPreference = "Stop"
 
 if (-not $PSBoundParameters.ContainsKey("Provider")) {
-    $Provider = if ($env:CVRAG_PROVIDER) { $env:CVRAG_PROVIDER } else { "fake" }
+    $Provider = if ($env:CVRAG_PROVIDER) { $env:CVRAG_PROVIDER } else { "offline" }
 }
-if ($Provider -notin @("fake", "dashscope")) {
-    throw "Provider must be 'fake' or 'dashscope'."
+if ($Provider -notin @("offline", "dashscope")) {
+    throw "Provider must be 'offline' or 'dashscope'."
 }
 if ($Provider -eq "dashscope" -and [string]::IsNullOrWhiteSpace($env:DASHSCOPE_API_KEY)) {
     throw "DashScope mode requires DASHSCOPE_API_KEY in the current process environment."

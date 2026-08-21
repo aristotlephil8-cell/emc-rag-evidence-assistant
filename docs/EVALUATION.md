@@ -73,7 +73,7 @@ The final variant passes the positive-effect gate only when all conditions hold 
 - Unanswerable false-answer rate is not worse than BM25.
 - Server citation ID validity is exactly 100%.
 
-If any gate fails, the report status is `failed`; no “improved by X%” resume statement should be generated. A fake-provider run is `contract_only` and cannot pass effectiveness gates.
+If any gate fails, the report status is `failed`; no “improved by X%” resume statement should be generated. An offline-provider run is `contract_only` and cannot pass effectiveness gates.
 
 ## Badcase taxonomy / Badcase 分类
 

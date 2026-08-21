@@ -46,7 +46,7 @@ services:
     build:
       context: ./backend
     environment:
-      CVRAG_PROVIDER: ${CVRAG_PROVIDER:-fake}
+      CVRAG_PROVIDER: ${CVRAG_PROVIDER:-offline}
       DASHSCOPE_API_KEY: ${DASHSCOPE_API_KEY:-}
       DASHSCOPE_BASE_URL: ${DASHSCOPE_BASE_URL:-https://dashscope.aliyuncs.com/compatible-mode/v1}
       DASHSCOPE_RERANK_URL: ${DASHSCOPE_RERANK_URL:-https://dashscope.aliyuncs.com/compatible-api/v1/reranks}
