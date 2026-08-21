@@ -71,61 +71,13 @@ flowchart LR
 
 ### 项目整体架构
 
-主架构图以历史 emcRAG 项目的完整业务架构为准。系统面向电磁兼容试验与整改场景，将前端、应用服务、确定性业务工作流、RAG 引擎、数据层和模型层组织成一条可追溯的业务链路。架构设计直接来源于业务需求：工作流负责控制“当前走哪一步、是否需要人工确认”，RAG 引擎负责“如何解析、检索和生成”，数据层负责版本、索引和审计记录，模型层负责 OCR、向量化、重排和回答生成。
+系统面向 EMC 资料问答场景，主流程是“资料管理 → 问题咨询 → 证据检索 → 结论生成 → 引用查看或人工复核”。系统由交互层、应用服务层、RAG 核心和基础设施与模型服务组成：资料经过解析、分块和索引后，问题通过检索、重排和证据组装生成回答。
 
 核心原则是：**让业务流程可审计，知识检索可追溯，高风险结论可由工程师接管。**
 
-```mermaid
-flowchart TB
-    subgraph FE[① 前端 React + Ant Design]
-        UI1[对话与问题澄清]
-        UI2[知识库管理]
-        UI3[报告上传与字段确认]
-        UI4[整改建议与引用查看]
-    end
-
-    subgraph API[② 应用服务层 FastAPI]
-        AUTH[认证与权限]
-        AUDIT[审计日志<br/>候选 · 引用 · 人工修正]
-    end
-
-    subgraph WF[③ 确定性业务工作流]
-        W1[问题澄清] --> W2[试验类型推荐]
-        W2 --> W3[试验方案生成]
-        W3 --> W4[报告解析与字段确认]
-        W4 --> W5[案例检索与原因分析]
-        W5 --> W6[整改建议与复验方案]
-    end
-
-    subgraph RAG[RAG 引擎层]
-        direction LR
-        ING[资料入库<br/>格式解析 · OCR · 结构化切分 · 元数据]
-        RET[检索管道<br/>查询路由 · 元数据过滤 · BM25 + kNN · Rerank]
-        GEN[生成与引用<br/>结构化输出 · 条款/页码引用 · 证据不足拒答]
-        ING --> RET --> GEN
-    end
-
-    subgraph DATA[⑤ 数据层]
-        PG[(PostgreSQL<br/>业务数据 · 项目 · 会话 · 审计)]
-        ES[(Elasticsearch<br/>倒排索引 · 向量索引)]
-        RD[(Redis<br/>任务队列 · 进度 · 临时缓存)]
-        FS[/文件存储<br/>原始文档/]
-    end
-
-    subgraph MODEL[⑥ 模型层]
-        M1[Qwen / vLLM<br/>生成模型]
-        M2[bge-m3 / Reranker<br/>向量化与精排]
-        M3[OCR / 版面 / 表格<br/>视觉解析模型]
-    end
-
-    FE --> API --> WF --> RAG
-    ING --> ES
-    ING --> FS
-    ING --> RD
-    RET --> ES
-    API --> PG
-    RAG --> MODEL
-```
+<p align="center">
+  <img src="docs/assets/architecture.svg" alt="EMC RAG 系统架构、业务流程与数据流" width="100%" />
+</p>
 
 ### 快速启动
 
@@ -220,7 +172,7 @@ Business problem
 
 ### Project architecture
 
-The project-level architecture follows the actual runtime: a React/Vite frontend and FastAPI API sit above two pipelines. The ingestion pipeline routes PDF, DOCX, and TXT files through text parsing or DeepDOC/OCR, creates structured chunks, records lifecycle state in SQLite, and writes rebuildable BM25/vector indexes to Elasticsearch. The online pipeline combines retrieval, RRF, reranking, evidence assembly, generation, and citation validation. Offline or DashScope providers supply model capabilities; evaluation and Badcase regression validate the pipeline without becoming a request-time dependency. Detailed data flow is documented in [Architecture](docs/ARCHITECTURE.md).
+The project architecture is organized into four layers: a React/Vite interaction layer, a FastAPI application service layer, the RAG core, and infrastructure/model services. The business flow covers EMC material management, question answering, evidence retrieval, conclusion generation, and citation or human review. The data flow covers document parsing and chunking, Elasticsearch indexing, Top-K retrieval, reranking, evidence assembly, structured claims, citation IDs, and final answer or refusal. PostgreSQL, Elasticsearch, Redis, file storage, DeepDOC, Embedding, Rerank, and LLM services support these flows. Detailed data flow is documented in [Architecture](docs/ARCHITECTURE.md).
 
 ### Local reproduction
 

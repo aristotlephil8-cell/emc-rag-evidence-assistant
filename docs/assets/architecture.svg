@@ -1,0 +1,131 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="1160" viewBox="0 0 1600 1160" role="img" aria-labelledby="title desc">
+  <title id="title">EMC RAG 系统架构、业务流程与数据流</title>
+  <desc id="desc">图中从上到下展示业务流程、数据流和系统架构，并标出资料解析、检索、重排、生成、存储和模型服务之间的关系。</desc>
+  <defs>
+    <marker id="arrow" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#64748b"/>
+    </marker>
+    <marker id="arrow-blue" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M 0 0 L 10 5 L 0 10 z" fill="#2563eb"/>
+    </marker>
+    <style>
+      text { font-family: "Microsoft YaHei", "Segoe UI", Arial, sans-serif; fill: #1e293b; }
+      .title { font-size: 22px; font-weight: 700; }
+      .lane-title { font-size: 16px; font-weight: 700; }
+      .label { font-size: 14px; }
+      .small { font-size: 12px; fill: #475569; }
+      .lane { fill: #f8fafc; stroke: #cbd5e1; stroke-width: 1.5; }
+      .business { fill: #eff6ff; stroke: #2563eb; stroke-width: 1.8; }
+      .data { fill: #fff7ed; stroke: #ea580c; stroke-width: 1.8; }
+      .arch { fill: #f1f5f9; stroke: #64748b; stroke-width: 1.6; }
+      .rag { fill: #ecfdf5; stroke: #059669; stroke-width: 1.8; }
+      .support { fill: #f5f3ff; stroke: #7c3aed; stroke-width: 1.8; }
+      .result { fill: #fef3c7; stroke: #d97706; stroke-width: 1.8; }
+      .flow { fill: none; stroke: #64748b; stroke-width: 1.8; marker-end: url(#arrow); }
+      .relation { fill: none; stroke: #94a3b8; stroke-width: 1.4; stroke-dasharray: 5 5; marker-end: url(#arrow); }
+      .main-flow { fill: none; stroke: #2563eb; stroke-width: 2.2; marker-end: url(#arrow-blue); }
+    </style>
+  </defs>
+
+  <rect width="1600" height="1160" fill="#ffffff"/>
+  <text x="800" y="35" text-anchor="middle" class="title">EMC RAG 系统架构、业务流程与数据流</text>
+
+  <rect x="60" y="60" width="1480" height="150" rx="12" class="lane"/>
+  <text x="800" y="87" text-anchor="middle" class="lane-title">业务流程</text>
+  <rect x="100" y="120" width="210" height="58" rx="9" class="business"/>
+  <rect x="390" y="120" width="210" height="58" rx="9" class="business"/>
+  <rect x="680" y="120" width="210" height="58" rx="9" class="business"/>
+  <rect x="970" y="120" width="210" height="58" rx="9" class="business"/>
+  <rect x="1260" y="120" width="240" height="58" rx="9" class="business"/>
+  <text x="205" y="155" text-anchor="middle" class="label">资料管理</text>
+  <text x="495" y="155" text-anchor="middle" class="label">EMC 问题咨询</text>
+  <text x="785" y="155" text-anchor="middle" class="label">证据检索</text>
+  <text x="1075" y="155" text-anchor="middle" class="label">结论生成</text>
+  <text x="1380" y="155" text-anchor="middle" class="label">引用查看 / 人工复核</text>
+  <path d="M310 149 H390 M600 149 H680 M890 149 H970 M1180 149 H1260" class="main-flow"/>
+
+  <rect x="60" y="245" width="1480" height="190" rx="12" class="lane"/>
+  <text x="800" y="272" text-anchor="middle" class="lane-title">数据流</text>
+  <rect x="85" y="305" width="145" height="72" rx="8" class="data"/>
+  <rect x="250" y="305" width="140" height="72" rx="8" class="data"/>
+  <rect x="410" y="305" width="135" height="72" rx="8" class="data"/>
+  <rect x="565" y="295" width="170" height="92" rx="8" class="data"/>
+  <rect x="755" y="305" width="125" height="72" rx="8" class="data"/>
+  <rect x="900" y="305" width="115" height="72" rx="8" class="data"/>
+  <rect x="1035" y="305" width="150" height="72" rx="8" class="data"/>
+  <rect x="1205" y="305" width="165" height="72" rx="8" class="data"/>
+  <rect x="1390" y="305" width="125" height="72" rx="8" class="result"/>
+  <text x="157" y="335" text-anchor="middle" class="label"><tspan x="157" dy="0">标准 / 手册 /</tspan><tspan x="157" dy="20">报告 / 案例</tspan></text>
+  <text x="320" y="345" text-anchor="middle" class="label">解析与结构化</text>
+  <text x="477" y="345" text-anchor="middle" class="label">Chunk + Metadata</text>
+  <text x="650" y="330" text-anchor="middle" class="label"><tspan x="650" dy="0">Elasticsearch</tspan><tspan x="650" dy="20" class="small">倒排 + 向量索引</tspan></text>
+  <text x="817" y="345" text-anchor="middle" class="label">Top-K 候选</text>
+  <text x="957" y="345" text-anchor="middle" class="label">Rerank</text>
+  <text x="1110" y="345" text-anchor="middle" class="label">Evidence Context</text>
+  <text x="1287" y="335" text-anchor="middle" class="label"><tspan x="1287" dy="0">Claims +</tspan><tspan x="1287" dy="20">Citation IDs</tspan></text>
+  <text x="1452" y="335" text-anchor="middle" class="label"><tspan x="1452" dy="0">回答 / 拒答 /</tspan><tspan x="1452" dy="20">人工确认</tspan></text>
+  <path d="M230 341 H250 M390 341 H410 M545 341 H565 M735 341 H755 M880 341 H900 M1015 341 H1035 M1185 341 H1205 M1370 341 H1390" class="flow"/>
+
+  <rect x="60" y="470" width="1480" height="630" rx="12" class="lane"/>
+  <text x="800" y="498" text-anchor="middle" class="lane-title">系统架构</text>
+
+  <rect x="100" y="530" width="1400" height="115" rx="10" class="arch"/>
+  <text x="800" y="555" text-anchor="middle" class="lane-title">交互层</text>
+  <rect x="260" y="575" width="240" height="42" rx="7" class="arch"/>
+  <rect x="680" y="575" width="240" height="42" rx="7" class="arch"/>
+  <rect x="1100" y="575" width="240" height="42" rx="7" class="arch"/>
+  <text x="380" y="601" text-anchor="middle" class="label">React + Ant Design</text>
+  <text x="800" y="601" text-anchor="middle" class="label">资料库管理</text>
+  <text x="1220" y="601" text-anchor="middle" class="label">对话与引用查看</text>
+  <path d="M500 596 H680 M920 596 H1100" class="flow"/>
+
+  <rect x="100" y="675" width="1400" height="115" rx="10" class="arch"/>
+  <text x="800" y="700" text-anchor="middle" class="lane-title">应用服务层</text>
+  <rect x="260" y="720" width="240" height="42" rx="7" class="arch"/>
+  <rect x="680" y="720" width="240" height="42" rx="7" class="arch"/>
+  <rect x="1100" y="720" width="240" height="42" rx="7" class="arch"/>
+  <text x="380" y="746" text-anchor="middle" class="label">FastAPI 入口</text>
+  <text x="800" y="746" text-anchor="middle" class="label">路由与认证</text>
+  <text x="1220" y="746" text-anchor="middle" class="label">Chat / Document / Session</text>
+  <path d="M500 741 H680 M920 741 H1100" class="flow"/>
+
+  <rect x="100" y="820" width="1400" height="115" rx="10" class="rag"/>
+  <text x="800" y="845" text-anchor="middle" class="lane-title">RAG 核心</text>
+  <rect x="260" y="865" width="240" height="42" rx="7" class="rag"/>
+  <rect x="680" y="865" width="240" height="42" rx="7" class="rag"/>
+  <rect x="1100" y="865" width="240" height="42" rx="7" class="rag"/>
+  <text x="380" y="891" text-anchor="middle" class="label">资料解析与入库</text>
+  <text x="800" y="891" text-anchor="middle" class="label">检索与重排</text>
+  <text x="1220" y="891" text-anchor="middle" class="label">提示词构建与生成</text>
+  <path d="M500 886 H680 M920 886 H1100" class="flow"/>
+
+  <rect x="100" y="965" width="1400" height="105" rx="10" class="support"/>
+  <text x="800" y="990" text-anchor="middle" class="lane-title">基础设施与模型服务</text>
+  <rect x="170" y="1010" width="180" height="38" rx="7" class="support"/>
+  <rect x="410" y="1010" width="180" height="38" rx="7" class="support"/>
+  <rect x="650" y="1010" width="150" height="38" rx="7" class="support"/>
+  <rect x="860" y="1010" width="150" height="38" rx="7" class="support"/>
+  <rect x="1070" y="1010" width="360" height="38" rx="7" class="support"/>
+  <text x="260" y="1035" text-anchor="middle" class="label">PostgreSQL</text>
+  <text x="500" y="1035" text-anchor="middle" class="label">Elasticsearch</text>
+  <text x="725" y="1035" text-anchor="middle" class="label">Redis</text>
+  <text x="935" y="1035" text-anchor="middle" class="label">文件存储</text>
+  <text x="1250" y="1035" text-anchor="middle" class="label">DeepDOC / Embedding / Rerank / LLM</text>
+
+  <path d="M800 210 V245" class="relation"/>
+  <path d="M205 178 C205 235 157 260 157 305" class="relation"/>
+  <path d="M495 178 C495 235 817 260 817 305" class="relation"/>
+  <path d="M785 178 C785 235 957 260 957 305" class="relation"/>
+  <path d="M1075 178 C1075 235 1287 260 1287 305" class="relation"/>
+  <path d="M1380 178 C1380 235 1452 260 1452 305" class="relation"/>
+  <path d="M320 377 C320 430 380 450 380 575" class="relation"/>
+  <path d="M650 387 C650 450 800 450 800 865" class="relation"/>
+  <path d="M957 377 C957 450 800 450 800 865" class="relation"/>
+  <path d="M1287 377 C1287 450 1220 450 1220 865" class="relation"/>
+  <path d="M380 762 V865" class="relation"/>
+  <path d="M800 762 V865" class="relation"/>
+  <path d="M1220 762 V865" class="relation"/>
+  <path d="M380 907 C380 940 260 950 260 1010" class="relation"/>
+  <path d="M800 907 C800 940 500 950 500 1010" class="relation"/>
+  <path d="M1220 907 C1220 940 1250 950 1250 1010" class="relation"/>
+</svg>
