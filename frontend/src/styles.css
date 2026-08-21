@@ -1074,7 +1074,7 @@ code {
   background: var(--danger);
 }
 
-.offline-fake-banner {
+.offline-provider-banner {
   display: flex;
   gap: 12px;
   align-items: flex-start;
@@ -1090,20 +1090,20 @@ code {
   box-shadow: inset 0 0 24px rgba(255, 180, 91, 0.035);
 }
 
-.offline-fake-banner > svg {
+.offline-provider-banner > svg {
   flex: 0 0 auto;
   width: 20px;
   color: var(--warning);
 }
 
-.offline-fake-banner strong {
+.offline-provider-banner strong {
   display: block;
   font-family: "SFMono-Regular", Consolas, monospace;
   font-size: 10px;
   letter-spacing: 0.06em;
 }
 
-.offline-fake-banner p {
+.offline-provider-banner p {
   margin: 6px 0 0;
   color: #d5b080;
   font-size: 10px;

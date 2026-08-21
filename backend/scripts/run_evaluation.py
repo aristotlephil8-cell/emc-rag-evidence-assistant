@@ -447,7 +447,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
     if args.provider == "dashscope" and not api_key:
         raise SystemExit(
             "DASHSCOPE_API_KEY is required for VERIFIED_SYNTHETIC evaluation; "
-            "the runner will not substitute FakeProvider."
+            "the runner will not substitute OfflineProvider."
         )
 
     with (
@@ -476,7 +476,7 @@ def run(args: argparse.Namespace) -> dict[str, Any]:
         provider = CachedProvider(build_provider(settings))
         cleanup.callback(provider.close)
         evaluation_evidence_status = (
-            "VERIFIED_SYNTHETIC" if args.provider == "dashscope" else "IMPLEMENTED_FAKE_VERIFIED"
+            "VERIFIED_SYNTHETIC" if args.provider == "dashscope" else "IMPLEMENTED_OFFLINE_VERIFIED"
         )
         index = build_elasticsearch_index(settings)
         cleanup.callback(index.client.close)
@@ -886,7 +886,7 @@ def main() -> None:
     parser = argparse.ArgumentParser(
         description="Run the frozen CVRAG ingestion/retrieval/citation evaluation."
     )
-    parser.add_argument("--provider", choices=("dashscope", "fake"), default="dashscope")
+    parser.add_argument("--provider", choices=("dashscope", "offline"), default="dashscope")
     parser.add_argument("--stage", choices=("all", "dev", "frozen"), default="all")
     parser.add_argument("--model-dir", type=Path, default=REPOSITORY_ROOT / "models" / "deepdoc")
     parser.add_argument("--elasticsearch-url", default="http://localhost:9200")

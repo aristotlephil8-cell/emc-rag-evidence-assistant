@@ -48,7 +48,7 @@ jobs:
   backend:
     runs-on: ubuntu-24.04
     env:
-      CVRAG_PROVIDER: fake
+      CVRAG_PROVIDER: offline
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -63,7 +63,7 @@ jobs:
           python -m ruff check
           backend/app backend/scripts backend/tests evaluation datasets
           scripts/elasticsearch_smoke.py
-      - name: Run isolated backend tests with fake provider
+      - name: Run isolated backend tests with offline provider
         run: python -m pytest backend/tests -m "not deepdoc and not integration"
       - name: Validate frozen synthetic data
         run: python evaluation/validate_dataset.py
@@ -96,7 +96,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 30
     env:
-      CVRAG_PROVIDER: fake
+      CVRAG_PROVIDER: offline
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -124,7 +124,7 @@ jobs:
     runs-on: ubuntu-24.04
     timeout-minutes: 15
     env:
-      CVRAG_PROVIDER: fake
+      CVRAG_PROVIDER: offline
       ELASTICSEARCH_URL: http://127.0.0.1:9200
     services:
       elasticsearch:

@@ -29,7 +29,7 @@ class StubParser:
 
 
 class StubProvider:
-    evidence_status = "IMPLEMENTED_FAKE_VERIFIED"
+    evidence_status = "IMPLEMENTED_OFFLINE_VERIFIED"
 
     def __init__(self):
         self.fail = False

@@ -414,10 +414,10 @@ def _features(text: str) -> set[str]:
     return {feature for feature in features if feature}
 
 
-class FakeProvider:
+class OfflineProvider:
     """Deterministic offline provider for contract tests; never effectiveness evidence."""
 
-    evidence_status = "IMPLEMENTED_FAKE_VERIFIED"
+    evidence_status = "IMPLEMENTED_OFFLINE_VERIFIED"
 
     def __init__(self, dimension: int = 1024):
         self.dimension = dimension
@@ -474,6 +474,6 @@ class FakeProvider:
 
 
 def build_provider(settings: Settings) -> ModelProvider:
-    if settings.CVRAG_PROVIDER == "fake":
-        return FakeProvider(settings.EMBEDDING_DIMENSION)
+    if settings.CVRAG_PROVIDER == "offline":
+        return OfflineProvider(settings.EMBEDDING_DIMENSION)
     return DashScopeProvider(settings)

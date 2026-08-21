@@ -7,7 +7,7 @@ import pytest
 
 from app.config import Settings
 from app.models import CitationSource, ScoreTrace, SearchHit, SourceLocator
-from app.providers import DashScopeProvider, FakeProvider, ProviderError
+from app.providers import DashScopeProvider, OfflineProvider, ProviderError
 
 
 def settings(**overrides: object) -> Settings:
@@ -35,14 +35,14 @@ def source(citation_id: str = "S1") -> CitationSource:
     return CitationSource(citation_id=citation_id, hit=hit)
 
 
-def test_fake_embeddings_are_deterministic_and_normalized() -> None:
-    provider = FakeProvider(dimension=16)
+def test_offline_embeddings_are_deterministic_and_normalized() -> None:
+    provider = OfflineProvider(dimension=16)
 
     first, second = provider.embed(["IEC 61000", "IEC 61000"])
 
     assert first == second
     assert sum(value * value for value in first) == pytest.approx(1.0)
-    assert provider.evidence_status == "IMPLEMENTED_FAKE_VERIFIED"
+    assert provider.evidence_status == "IMPLEMENTED_OFFLINE_VERIFIED"
 
 
 def test_dashscope_embedding_restores_provider_order() -> None:

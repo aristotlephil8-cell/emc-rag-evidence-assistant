@@ -10,7 +10,7 @@ from app.models import (
     SearchHit,
     SourceLocator,
 )
-from app.providers import FakeProvider
+from app.providers import OfflineProvider
 from app.services import ChatService
 
 
@@ -49,7 +49,7 @@ class StubRetrieval:
         )
 
 
-class GeneratedProvider(FakeProvider):
+class GeneratedProvider(OfflineProvider):
     def __init__(self, generated: GeneratedAnswer):
         super().__init__(dimension=8)
         self.generated = generated

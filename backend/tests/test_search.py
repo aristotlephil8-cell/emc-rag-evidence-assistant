@@ -3,7 +3,7 @@ from __future__ import annotations
 import pytest
 
 from app.models import RetrievalRequest, RetrievalVariant, SourceLocator
-from app.providers import FakeProvider, ProviderError
+from app.providers import OfflineProvider, ProviderError
 from app.search import (
     Candidate,
     ElasticsearchIndex,
@@ -42,7 +42,7 @@ class StubBackend:
         return self.semantic
 
 
-class FailingRerankProvider(FakeProvider):
+class FailingRerankProvider(OfflineProvider):
     def rerank(self, query: str, documents: list[str]) -> list[float]:
         del query, documents
         raise ProviderError("provider_network_error")
@@ -65,7 +65,7 @@ def test_weighted_rrf_is_stable_and_rewards_shared_evidence() -> None:
 
 
 def test_routed_retrieval_records_all_score_stages() -> None:
-    service = RetrievalService(StubBackend(), FakeProvider(dimension=8))
+    service = RetrievalService(StubBackend(), OfflineProvider(dimension=8))
 
     response = service.search(
         RetrievalRequest(
